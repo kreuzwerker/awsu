@@ -14,7 +14,7 @@ var lsCmd = &cobra.Command{
 	Short: "List all profile",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		keys := config.config.SectionStrings()
+		keys := config.SectionStrings()
 		sort.Strings(keys)
 
 		fmt.Println(strings.Join(keys, "\n"))

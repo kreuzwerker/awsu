@@ -1,16 +1,19 @@
 package command
 
 import (
+	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/ini.v1"
 
 	"github.com/spf13/cobra"
 )
 
-const (
-	aki = "AWS_ACCESS_KEY_ID"
-	ask = "AWS_SECRET_ACCESS_KEY"
-	ast = "AWS_SESSION_TOKEN"
+var (
+	config  *ini.File
+	section *ini.Section
 )
 
 var rootFlags = struct {
@@ -21,7 +24,31 @@ var rootFlags = struct {
 
 var rootCmd = &cobra.Command{
 	Use: app,
-	PersistentPreRunE: config.PreRun,
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+
+		cfg, err := ini.Load(rootFlags.configPath)
+
+		if err != nil {
+			return fmt.Errorf("error while opening config at %q: %s",
+				rootFlags.configPath,
+				err)
+		}
+
+		config = cfg
+
+		sec, err := config.GetSection(rootFlags.profile)
+
+		if err != nil {
+			return fmt.Errorf("error while fetching profile %q from config: %s",
+				rootFlags.profile,
+				err)
+		}
+
+		section = sec
+
+		return nil
+
+	},
 }
 
 func init() {
@@ -40,6 +67,8 @@ func init() {
 		}
 
 	}
+
+	log.SetOutput(os.Stderr)
 
 	rootCmd.PersistentFlags().StringVarP(&rootFlags.configPath,
 		"config",

@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/kreuzwerker/awsu"
 	"github.com/spf13/cobra"
 )
 
@@ -24,9 +25,9 @@ var consoleCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		fep := map[string]string{
-			"sessionId":    os.Getenv(aki),
-			"sessionKey":   os.Getenv(ask),
-			"sessionToken": os.Getenv(ast),
+			"sessionId":    os.Getenv(awsu.AccessKeyID),
+			"sessionKey":   os.Getenv(awsu.SecretAccessKey),
+			"sessionToken": os.Getenv(awsu.SessionToken),
 		}
 
 		enc, err := json.Marshal(fep)

@@ -2,72 +2,85 @@ package command
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/sts"
+	"log"
+	"os"
+	"strings"
+
+	"github.com/kreuzwerker/awsu"
 	"github.com/spf13/cobra"
 	"github.com/yawn/envmap"
 )
 
 var exportCmd = &cobra.Command{
 
-	Use:     "export",
-	Short:   "Exports shell variables",
-	PreRunE: stsClient.PreRun,
-	RunE: func(cmd *cobra.Command, args []string) error {		// var (
-			// 	exp = fmt.Sprintf(`^(?:_)*(?:%s)$`, strings.Join([]string{aki, ask, ast}, "|"))
-			// 	f   = regexp.MustCompile(exp).MatchString
-			// )
-			//
-			// e1 := envmap.Import()
-			// e2 := e1.Push("_", f).Push("_", f).Push("_", f)
-			//
-			// fmt.Println(e2.Subset(f))
-			//
-			// if true {
-			// 	return nil
-			// }
+	Use:   "export",
+	Short: "Exports shell variables",
+	RunE: func(cmd *cobra.Command, args []string) error {
 
-		hash := config.section.KeysHash()
+		f := envmap.PrefixedKeys("_", strings.Join(awsu.AllKeys, "|")).MatchString
+		e := envmap.Import()
 
-		params := &sts.AssumeRoleInput{
-			DurationSeconds: aws.Int64(3600),
-			RoleSessionName: this.Session(),
+		if e.IsSet(awsu.SessionActive) {
+
+			// temporarily remove keys
+			for k := range e.Subset(f) {
+				os.Unsetenv(k)
+			}
+
 		}
 
 		var (
-			externalID = config.section.HasKey("external_id")
-			role       = config.section.HasKey("role_arn")
+			hash = section.KeysHash()
+			env  envmap.Envmap
 		)
 
-		if role {
+		client, err := awsu.NewClient()
 
-			params.RoleArn = aws.String(hash["role_arn"])
+		if err != nil {
+			return err
+		}
 
-			if externalID {
-				params.ExternalId = aws.String(hash["external_id"])
+		var (
+			aki = hash["aws_access_key_id"]
+			arn = hash["role_arn"]
+			ask = hash["aws_secret_access_key"]
+			eid = hash["external_id"]
+		)
+
+		if aki != "" && ask != "" {
+
+			log.Println("found keypair, re-exporting from credentials")
+
+			res := map[string]string{
+				awsu.AccessKeyID:     hash["aws_access_key_id"],
+				awsu.SecretAccessKey: hash["aws_secret_access_key"],
 			}
 
-			res, err := stsClient.AssumeRole(params)
+			env = res
+
+		} else if arn != "" {
+
+			log.Println("found role, assuming it")
+
+			res, err := client.AssumeRole(&awsu.Options{
+				ARN:        arn,
+				ExternalID: eid,
+			})
 
 			if err != nil {
-				return fmt.Errorf("error during assume role call: %s", err)
+				return err
 			}
 
-			var e2  envmap.Envmap = make(map[string]string, 3)
-
-			e2[aki] = *res.Credentials.AccessKeyId
-			e2[ask] = *res.Credentials.SecretAccessKey
-			e2[ast] = *res.Credentials.SessionToken
-
-			for k, v := range e2 {
-				fmt.Printf("unset %s\n", k)
-				fmt.Printf("export %s=%s\n", k, v)
-			}
+			env = res
 
 		} else {
-			return fmt.Errorf("no way to assume role for profile %q with keys %s",
-				rootFlags.profile,
-				config.section.KeyStrings())
+			return fmt.Errorf("no strategy for handling profile %q", rootFlags.profile)
+		}
+
+		env[awsu.SessionActive] = rootFlags.profile
+
+		for _, e := range env.Subset(f).ToEnv() {
+			fmt.Printf("export %s\n", e)
 		}
 
 		return nil

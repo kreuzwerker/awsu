@@ -3,26 +3,34 @@ package command
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/kreuzwerker/awsu"
 	"github.com/spf13/cobra"
 )
 
 var whoamiCmd = &cobra.Command{
 
-	Use:     "whoami",
-	Short:   "Info about the currently selected account",
-	PreRunE: stsClient.PreRun,
+	Use:   "whoami",
+	Short: "Info about the currently selected account",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		res, err := stsClient.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+		client, err := awsu.NewClient()
 
 		if err != nil {
 			return err
 		}
 
-		fmt.Println(*res.Arn)
+		// TODO: use flags to determine what to return
+
+		res, err := client.CallerIdentity()
+
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(res.ARN)
 
 		return nil
+
 	},
 }
 
