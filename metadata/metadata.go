@@ -6,11 +6,15 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 )
 
+// Metadata is additional provider metadata like the serial number of the MFA
+// and the external ID of the non-cross-account role
 type Metadata struct {
 	ExternalID   string `json:",omitempty"`
 	SerialNumber string `json:",omitempty"`
 }
 
+// New extracts additional provider metadata (if applicable) from the given
+// credentials
 func New(c *credentials.Credentials) Metadata {
 
 	v1 := reflect.Indirect(reflect.ValueOf(c))
