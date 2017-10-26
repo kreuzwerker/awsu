@@ -7,10 +7,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
-	"os/exec"
 
-	"github.com/kreuzwerker/awsu"
+	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
 )
 
@@ -24,10 +22,21 @@ var consoleCmd = &cobra.Command{
 	Short: "Generates link to or opens AWS console",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
+		sess, err := newSession(rootFlags.workspace)
+
+		if err != nil {
+			return err
+		}
+
+		// TODO: make this work for CA roles
+		if sess.SessionToken == "" || sess.ExternalID == "" {
+			return fmt.Errorf("cannot marshal federation token without session token or external ID")
+		}
+
 		fep := map[string]string{
-			"sessionId":    os.Getenv(awsu.AccessKeyID),
-			"sessionKey":   os.Getenv(awsu.SecretAccessKey),
-			"sessionToken": os.Getenv(awsu.SessionToken),
+			"sessionId":    sess.AccessKeyID,
+			"sessionKey":   sess.SessionToken,
+			"sessionToken": sess.SessionToken,
 		}
 
 		enc, err := json.Marshal(fep)
@@ -70,14 +79,10 @@ var consoleCmd = &cobra.Command{
 			token)
 
 		if consoleFlags.open {
-
-			if err := exec.Command("/usr/bin/open", url).Run(); err != nil {
-				return fmt.Errorf("error while running 'open': %s", err)
-			}
-
-		} else {
-			fmt.Println(url)
+			return open.Run(url)
 		}
+
+		fmt.Println(url)
 
 		return nil
 
@@ -86,11 +91,8 @@ var consoleCmd = &cobra.Command{
 
 func init() {
 
-	consoleCmd.Flags().BoolVarP(&consoleFlags.open,
-		"open",
-		"o",
-		true,
-		"Attempts to open the generated url")
+	consoleCmd.Flags().BoolVarP(&consoleFlags.open, "open", "o", true, "attempts to open the generated url")
 
 	rootCmd.AddCommand(consoleCmd)
+
 }
