@@ -1,3 +1,4 @@
 .awsu*
 build/
 exp/
+.token
