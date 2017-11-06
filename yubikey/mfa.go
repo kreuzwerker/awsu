@@ -7,40 +7,18 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/arn"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	asession "github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	otp "github.com/hgfischer/go-otp"
 	"github.com/kreuzwerker/awsu/log"
-	"github.com/kreuzwerker/awsu/session"
-	"github.com/mdp/qrterminal"
 	"github.com/pkg/errors"
 )
 
 // NewMFA generates a new virtual MFA device and associates it with a Yubikey
-func NewMFA(sess *session.Session, qr io.Writer, username string) (*arn.ARN, error) {
+func NewMFA(sess *session.Session, qr func(string), username string) (*arn.ARN, error) {
 
-	client := iam.New(asession.Must(
-		asession.NewSession(
-			&aws.Config{
-				Credentials: credentials.NewStaticCredentialsFromCreds(sess.Value),
-			},
-		),
-	)
-
-	qr := func(secret string) {
-
-		uri := fmt.Sprintf("otpauth://totp/%s@%s?secret=%s&issuer=Amazon",
-			username,
-			sess.Profile,
-			string(secret),
-		)
-
-		qrterminal.Generate(uri, qrterminal.L, qr)
-
-	}
+	client := iam.New(sess)
 
 	device, err := createDevice(client, qr)
 
@@ -109,6 +87,8 @@ func createDevice(client *iam.IAM, qr func(string)) (*iam.VirtualMFADevice, erro
 	if err != nil {
 		return nil, err
 	}
+
+	qr(string(res.VirtualMFADevice.Base32StringSeed))
 
 	return res.VirtualMFADevice, nil
 
