@@ -1,0 +1,27 @@
+package: github.com/kreuzwerker/awsu
+import:
+- package: github.com/aws/aws-sdk-go
+  version: ^1.12.22
+  subpackages:
+  - aws/arn
+  - aws/credentials
+  - aws/credentials/stscreds
+  - aws/session
+- package: github.com/joshdk/ykmango
+  version: ^0.0.0
+- package: github.com/pkg/errors
+  version: ^0.8.0
+- package: github.com/skratchdot/open-golang
+  subpackages:
+  - open
+- package: github.com/spf13/cobra
+  version: ^0.0.1
+- package: github.com/yawn/doubledash
+- package: github.com/yawn/envmap
+- package: gopkg.in/ini.v1
+  version: ^1.30.3
+testImport:
+- package: github.com/stretchr/testify
+  version: ^1.1.4
+  subpackages:
+  - assert
