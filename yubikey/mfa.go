@@ -4,24 +4,45 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os/exec"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/arn"
-	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	asession "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	otp "github.com/hgfischer/go-otp"
 	"github.com/kreuzwerker/awsu/log"
+	"github.com/kreuzwerker/awsu/session"
+	"github.com/mdp/qrterminal"
 	"github.com/pkg/errors"
 )
 
 // NewMFA generates a new virtual MFA device and associates it with a Yubikey
-func NewMFA(sess *session.Session, filename, username string) (*arn.ARN, error) {
+func NewMFA(sess *session.Session, qr io.Writer, username string) (*arn.ARN, error) {
 
-	client := iam.New(sess)
+	client := iam.New(asession.Must(
+		asession.NewSession(
+			&aws.Config{
+				Credentials: credentials.NewStaticCredentialsFromCreds(sess.Value),
+			},
+		),
+	)
 
-	device, err := createDevice(client, filename)
+	qr := func(secret string) {
+
+		uri := fmt.Sprintf("otpauth://totp/%s@%s?secret=%s&issuer=Amazon",
+			username,
+			sess.Profile,
+			string(secret),
+		)
+
+		qrterminal.Generate(uri, qrterminal.L, qr)
+
+	}
+
+	device, err := createDevice(client, qr)
 
 	if err != nil {
 		return nil, err
@@ -70,8 +91,8 @@ func associateDevice(a ARN, secret []byte) error {
 
 }
 
-// createDevice creates a new virtual MFA device and writes the QR code to the given WriteCloser
-func createDevice(client *iam.IAM, filenameForQRCode string) (*iam.VirtualMFADevice, error) {
+// createDevice creates a new virtual MFA device and calls the qr function with it's secret
+func createDevice(client *iam.IAM, qr func(string)) (*iam.VirtualMFADevice, error) {
 
 	id, err := newDeviceID()
 
@@ -86,10 +107,6 @@ func createDevice(client *iam.IAM, filenameForQRCode string) (*iam.VirtualMFADev
 	res, err := client.CreateVirtualMFADevice(req)
 
 	if err != nil {
-		return nil, err
-	}
-
-	if err := ioutil.WriteFile(filenameForQRCode, res.VirtualMFADevice.QRCodePNG, 0600); err != nil {
 		return nil, err
 	}
 

@@ -2,16 +2,13 @@ package command
 
 import (
 	"fmt"
+	"os"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/kreuzwerker/awsu/yubikey"
 	"github.com/spf13/cobra"
 )
 
 var registerFlags = struct {
-	filename string
 }{}
 
 var registerCmd = &cobra.Command{
@@ -28,14 +25,8 @@ var registerCmd = &cobra.Command{
 		}
 
 		arn, err := yubikey.NewMFA(
-			session.Must(
-				session.NewSession(
-					&aws.Config{
-						Credentials: credentials.NewStaticCredentialsFromCreds(sess.Value),
-					},
-				),
-			),
-			registerFlags.filename,
+			sess,
+			os.Stderr,
 			args[0],
 		)
 
@@ -51,9 +42,5 @@ var registerCmd = &cobra.Command{
 }
 
 func init() {
-
-	registerCmd.Flags().StringVarP(&registerFlags.filename, "filename", "f", "qr.png", "filename for the QR code PNG")
-
 	rootCmd.AddCommand(registerCmd)
-
 }
