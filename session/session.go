@@ -1,6 +1,7 @@
 package session
 
 import (
+	"crypto/sha1"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -18,6 +19,7 @@ import (
 	"github.com/kreuzwerker/awsu/log"
 	"github.com/kreuzwerker/awsu/metadata"
 	"github.com/kreuzwerker/awsu/yubikey"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/yawn/envmap"
 )
 
@@ -165,7 +167,15 @@ func Load(dir, profile string) (*Session, error) {
 
 func sessionPath(dir, profile string) (string, error) {
 
-	dir = filepath.Join(dir, ".awsu-session")
+	hash := sha1.Sum([]byte(dir))
+
+	home, err := homedir.Dir()
+
+	if err != nil {
+		return "", err
+	}
+
+	dir = filepath.Join(home, ".awsu", "sessions", fmt.Sprintf("%x", hash[:]))
 
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return "", err
