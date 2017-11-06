@@ -1,9 +1,6 @@
 package yubikey
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/aws/aws-sdk-go/aws/arn"
 	ykman "github.com/joshdk/ykmango"
 	"github.com/kreuzwerker/awsu/log"
@@ -18,21 +15,18 @@ func Generate(mfa string) (string, error) {
 		return "", errors.Wrapf(err, "cannot parse ARN from %q", mfa)
 	}
 
-	var (
-		issuer = fmt.Sprintf("aws/iam/%s", arn.AccountID)
-		name   = strings.TrimPrefix(arn.Resource, "mfa/")
-	)
+	a := ARN(arn)
 
-	log.Log("asking for yubikey OATH slot with issuer %q and name %q", issuer, name)
+	log.Log("asking for yubikey OATH slot with issuer %q and name %q", a.Issuer(), a.Name())
 
 	// TODO: check for touch-bit in metadata
 
-	code, err := ykman.Generate(fmt.Sprintf("%s:%s", issuer, name))
+	code, err := ykman.Generate(a.Query())
 
 	if err != nil {
 		switch err {
 		case ykman.ErrorSlotNameUnknown:
-			return "", errors.Wrapf(err, "cannot find registered MFA for issuer %q and name %q", issuer, name)
+			return "", errors.Wrapf(err, "cannot find registered MFA for issuer %q and name %q", a.Issuer(), a.Name())
 		case ykman.ErrorYkmanNotFound, ykman.ErrorYubikeyNotDetected, ykman.ErrorYubikeyTimeout:
 			return "", errors.Wrapf(err, "cannot connect to yubikey")
 		default:
