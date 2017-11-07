@@ -2,49 +2,42 @@ package command
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"path/filepath"
 
-	"gopkg.in/ini.v1"
-
+	"github.com/kreuzwerker/awsu/log"
 	"github.com/spf13/cobra"
-)
-
-var (
-	config  *ini.File
-	section *ini.Section
+	"github.com/yawn/doubledash"
 )
 
 var rootFlags = struct {
-	configPath string
-	prefix     string
-	profile    string
+	verbose   bool
+	workspace string
 }{}
 
 var rootCmd = &cobra.Command{
 	Use: app,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
-		cfg, err := ini.Load(rootFlags.configPath)
-
-		if err != nil {
-			return fmt.Errorf("error while opening config at %q: %s",
-				rootFlags.configPath,
-				err)
+		if rootFlags.verbose {
+			log.Debug = true
 		}
 
-		config = cfg
+		return nil
 
-		sec, err := config.GetSection(rootFlags.profile)
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+
+		sess, err := newSession(rootFlags.workspace)
 
 		if err != nil {
-			return fmt.Errorf("error while fetching profile %q from config: %s",
-				rootFlags.profile,
-				err)
+			return err
 		}
 
-		section = sec
+		if len(doubledash.Xtra) > 0 {
+			return sess.Exec(doubledash.Xtra[0], doubledash.Xtra)
+		}
+
+		fmt.Println(sess.String())
 
 		return nil
 
@@ -53,39 +46,9 @@ var rootCmd = &cobra.Command{
 
 func init() {
 
-	config := os.Getenv("AWS_SHARED_CREDENTIALS_FILE")
+	os.Args = doubledash.Args
 
-	if config == "" {
-
-		for _, home := range []string{os.Getenv("HOME"), os.Getenv("USERPROFILE")} {
-
-			if home != "" {
-				config = filepath.Join(home, ".aws", "credentials")
-				break
-			}
-
-		}
-
-	}
-
-	log.SetOutput(os.Stderr)
-
-	rootCmd.PersistentFlags().StringVarP(&rootFlags.configPath,
-		"config",
-		"c",
-		config,
-		"AWS credentials file location")
-
-	rootCmd.PersistentFlags().StringVarP(&rootFlags.prefix,
-		"prefix",
-		"x",
-		"_",
-		"Prefix token for shadowing environment variables")
-
-	rootCmd.PersistentFlags().StringVarP(&rootFlags.profile,
-		"profile",
-		"p",
-		os.Getenv("AWS_PROFILE"),
-		"Profile to pick")
+	rootCmd.PersistentFlags().StringVarP(&rootFlags.workspace, "workspace", "w", "", "set the currently used workspace, default to Terraform settings")
+	rootCmd.PersistentFlags().BoolVarP(&rootFlags.verbose, "verbose", "v", false, "enable verbose operations")
 
 }

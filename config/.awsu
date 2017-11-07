@@ -1,0 +1,5 @@
+[profiles]
+
+default     = kreuzwerker
+production  = foo
+staging     = bar
