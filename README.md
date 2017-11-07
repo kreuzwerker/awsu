@@ -62,3 +62,20 @@ Afterwards successful registration `awsu` will
 * encode the QR code to `stderr` - this code can be scanned for usage e.g. with the AWS Console
 
 Note: the QR code has a slightly non-standard key-uri-format: `otpauth://totp/:username@:profile?secret=:secret&issuer=Amazon`. This makes certain authenticator apps understand which icon to pick and matches the IAM username directly to the used profile.
+
+## Configure MFA as part of aws-cli
+
+After the setting up the MFA device you can configure `aws-cli` to use MFA in the following way:
+
+```
+[my_iam_user]
+aws_access_key_id = AKIABLAHBLAHBLAHBLAH
+aws_secret_access_key = <blah>
+region = us-east-1
+
+[my_admin_role]
+role_arn = arn:aws:iam::123456789123:role/my_admin_role
+source_profile = my_iam_user
+mfa_serial = arn:aws:iam::123456789123:mfa/my_iam_user
+region = us-east-1
+```
