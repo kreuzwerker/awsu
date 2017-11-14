@@ -1,9 +1,6 @@
 package yubikey
 
 import (
-	"crypto/rand"
-	"fmt"
-	"io"
 	"os/exec"
 	"time"
 
@@ -20,7 +17,7 @@ func NewMFA(sess *session.Session, qr func(string), username string) (*arn.ARN, 
 
 	client := iam.New(sess)
 
-	device, err := createDevice(client, qr)
+	device, err := createDevice(client, qr, username)
 
 	if err != nil {
 		return nil, err
@@ -70,16 +67,10 @@ func associateDevice(a ARN, secret []byte) error {
 }
 
 // createDevice creates a new virtual MFA device and calls the qr function with it's secret
-func createDevice(client *iam.IAM, qr func(string)) (*iam.VirtualMFADevice, error) {
-
-	id, err := newDeviceID()
-
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to generate new device ID")
-	}
+func createDevice(client *iam.IAM, qr func(string), username string) (*iam.VirtualMFADevice, error) {
 
 	req := &iam.CreateVirtualMFADeviceInput{
-		VirtualMFADeviceName: id,
+		VirtualMFADeviceName: &username,
 	}
 
 	res, err := client.CreateVirtualMFADevice(req)
@@ -127,20 +118,5 @@ func enableDevice(client *iam.IAM, device *iam.VirtualMFADevice, username string
 	_, err := client.EnableMFADevice(req)
 
 	return err
-
-}
-
-// newDeviceID generates a new random ID for the virtual MFA device
-func newDeviceID() (*string, error) {
-
-	buf := make([]byte, 16)
-
-	if _, err := io.ReadFull(rand.Reader, buf); err != nil {
-		return nil, err
-	}
-
-	id := fmt.Sprintf("awsu-%x", buf)
-
-	return &id, nil
 
 }
