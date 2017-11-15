@@ -6,7 +6,11 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 
+	"github.com/kreuzwerker/awsu/log"
+	"github.com/yawn/envmap"
 	ini "gopkg.in/ini.v1"
 )
 
@@ -28,6 +32,10 @@ func (c *Config) DetectWorkspace() string {
 	)
 
 	if envVar := os.Getenv(WorkspaceNameEnvVar); envVar != "" {
+		return envVar
+	}
+
+	if envVar := os.Getenv("AWSU_WORKSPACE"); envVar != "" {
 		return envVar
 	}
 
@@ -55,6 +63,52 @@ func (c *Config) Get(workspace string) (string, error) {
 
 }
 
+// keys returns a sorted list of workspace names
+func (c *Config) workspaces() []string {
+
+	var keys sort.StringSlice
+
+	for k := range c.Profiles {
+		keys = append(keys, k)
+	}
+
+	keys.Sort()
+
+	return keys
+
+}
+
+// Detect will load configuration values from the environment
+func Detect() *Config {
+
+	const (
+		prefix = "AWSU_WORKSPACE_"
+	)
+
+	config := &Config{
+		Profiles: make(map[string]string),
+	}
+
+	for k, v := range envmap.Import() {
+
+		if strings.HasPrefix(k, prefix) {
+			k = strings.ToLower(strings.TrimPrefix(k, prefix))
+			config.Profiles[k] = v
+		}
+
+	}
+
+	if len(config.Profiles) == 0 {
+		return nil
+	}
+
+	log.Log("loading config from environment (%s)", config.workspaces())
+
+	return config
+
+}
+
+// Load will load configuration values from a file
 func Load(dir string) (*Config, error) {
 
 	path := filepath.Join(dir, ".awsu")
@@ -71,8 +125,12 @@ func Load(dir string) (*Config, error) {
 		return nil, err
 	}
 
-	return &Config{
+	config := &Config{
 		Profiles: sec.KeysHash(),
-	}, nil
+	}
+
+	log.Log("loading config from file %q (%s)", path, config.workspaces())
+
+	return config, nil
 
 }
