@@ -86,12 +86,12 @@ func (s *Session) Save(dir string) error {
 func (s *Session) String() string {
 
 	parts := []string{
-		fmt.Sprintf("AWS_ACCESS_KEY_ID=%s", s.AccessKeyID),
-		fmt.Sprintf("AWS_SECRET_ACCESS_KEY=%s", s.SecretAccessKey),
+		fmt.Sprintf("export AWS_ACCESS_KEY_ID=%s", s.AccessKeyID),
+		fmt.Sprintf("export AWS_SECRET_ACCESS_KEY=%s", s.SecretAccessKey),
 	}
 
 	if s.SessionToken != "" {
-		parts = append(parts, fmt.Sprintf("AWS_SESSION_TOKEN=%s", s.SessionToken))
+		parts = append(parts, fmt.Sprintf("export AWS_SESSION_TOKEN=%s", s.SessionToken))
 	}
 
 	return strings.Join(parts, "\n")
