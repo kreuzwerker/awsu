@@ -15,9 +15,9 @@ func TestDetectAndGet(t *testing.T) {
 
 	assert.Nil(cfg)
 
-	os.Setenv("AWSU_WORKSPACE_DEFAULT", "kreuzwerker")
-	os.Setenv("AWSU_WORKSPACE_STAGING", "bar")
-	os.Setenv("AWSU_WORKSPACE_PRODUCTION", "foo")
+	os.Setenv("AWSU_PROFILE_DEFAULT", "kreuzwerker")
+	os.Setenv("AWSU_PROFILE_STAGING", "bar")
+	os.Setenv("AWSU_PROFILE_PRODUCTION", "foo")
 
 	cfg = Detect()
 

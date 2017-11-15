@@ -81,9 +81,7 @@ func (c *Config) workspaces() []string {
 // Detect will load configuration values from the environment
 func Detect() *Config {
 
-	const (
-		prefix = "AWSU_WORKSPACE_"
-	)
+	const prefix = "AWSU_PROFILE_"
 
 	config := &Config{
 		Profiles: make(map[string]string),
