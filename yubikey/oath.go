@@ -34,6 +34,8 @@ func Generate(mfa string) (string, error) {
 		}
 	}
 
+	log.Log("received %q as code", code)
+
 	return code, nil
 
 }
