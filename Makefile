@@ -1,4 +1,4 @@
-VERSION := "2.0"
+VERSION := "2.0.1"
 
 BUILD := $(shell git rev-parse --short HEAD)
 FLAGS	:= "-s -w -X=main.build=$(BUILD) -X=main.version=$(VERSION)"
