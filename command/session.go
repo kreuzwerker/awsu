@@ -15,10 +15,17 @@ func newSession(workspace string) (*session.Session, error) {
 		return nil, err
 	}
 
-	cfg, err := config.Load(cwd)
+	cfg := config.Detect()
 
-	if err != nil {
-		return nil, err
+	// if we have no config yet, try to load the file
+	if cfg == nil {
+
+		cfg, err = config.Load(cwd)
+
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
 	if workspace == "" {
