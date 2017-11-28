@@ -8,7 +8,7 @@ USER := kreuzwerker
 
 build:
 	gox -parallel=8 -osarch="darwin/amd64 linux/amd64" -ldflags $(FLAGS) -output "build/awsu-{{.OS}}-{{.Arch}}" ./bin/
-	parallel "upx --best --ultra-brute --quiet {} && gpg --armor --batch --yes --detach-sign {}" ::: build/awsu-*-*
+	parallel upx --best --ultra-brute --quiet {} ::: build/awsu-*-*
 
 clean:
 	rm -rf build
