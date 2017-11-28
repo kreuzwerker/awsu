@@ -108,7 +108,7 @@ func New(profile string) (*Session, error) {
 	)
 
 	// this is currently the only way to ensure this ttl
-	stscreds.DefaultDuration = 15 * time.Minute
+	stscreds.DefaultDuration = 1 * time.Hour
 
 	sess = session.Must(session.NewSessionWithOptions(session.Options{
 		AssumeRoleTokenProvider: tp.Provide,

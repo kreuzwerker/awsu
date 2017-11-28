@@ -50,7 +50,7 @@ production  = production
 
 ## Running `awsu`
 
-`awsu` can be run in two modes: export and exec.
+`awsu` can be run in two modes: export and exec. `awsu` always tries to assume roles for the maximum amount of time (60 minutes).
 
 ### Export mode
 
@@ -60,7 +60,7 @@ When `awsu` is invoked without additional arguments, the resulting credentials a
 eval $(awsu)
 ```
 
-After using export mode, credentials can used until they expire. `awsu` always tries to assume roles for the minimum amount of time (15 minutes).
+After using export mode, credentials can used until they expire.
 
 ### Exec mode
 
