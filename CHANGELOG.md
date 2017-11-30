@@ -2,6 +2,12 @@
 
 All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will be documented in this file.
 
+## [2.0.2]
+
+### Changed
+
+- Put instructions on how to delete the MFA into registration error message
+
 ## [2.0.1]
 
 ### Added

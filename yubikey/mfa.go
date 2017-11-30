@@ -1,6 +1,7 @@
 package yubikey
 
 import (
+	"fmt"
 	"os/exec"
 	"time"
 
@@ -29,12 +30,20 @@ func NewMFA(sess *session.Session, qr func(string), username string) (*arn.ARN, 
 		return nil, err
 	}
 
+	rollback := fmt.Sprintf("aws iam delete-virtual-mfa-device --serial-number %s", a.String())
+
 	if err = associateDevice(ARN(a), device.Base32StringSeed); err != nil {
-		return nil, errors.Wrapf(err, "failed to associate device with Yubikey, consider deleting obsolete MFA device %q", *device.SerialNumber)
+		return nil,
+			errors.Wrapf(err, "failed to associate device with Yubikey, consider deleting obsolete MFA device with %q",
+				rollback,
+			)
 	}
 
 	if err = enableDevice(client, device, username); err != nil {
-		return nil, errors.Wrapf(err, "failed to enable device in IAM, consider deleting obsolete MFA device %q", *device.SerialNumber)
+		return nil,
+			errors.Wrapf(err, "failed to enable device in IAM, consider deleting obsolete MFA device with %q",
+				rollback,
+			)
 	}
 
 	return &a, nil
