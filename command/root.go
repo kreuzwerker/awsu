@@ -22,6 +22,10 @@ var rootCmd = &cobra.Command{
 			log.Debug = true
 		}
 
+		if os.Getenv("AWSU_VERBOSE") != "" {
+			log.Debug = true
+		}
+
 		return nil
 
 	},

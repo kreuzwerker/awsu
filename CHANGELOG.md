@@ -7,6 +7,7 @@ All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will 
 ### Added
 
 - Added config-file-less mode using environment variables (e.g. in case Terraform is not used)
+- Trigger verbose mode via `AWSU_VERBOSE`
 
 ### Changed
 

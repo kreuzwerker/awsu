@@ -76,7 +76,7 @@ alias terraform="awsu -v -- terraform"
 
 ## Caching
 
-The resulting session metadata (regardless of the mode) is cached in `~/.awsu/sessions/:id/:environment.json`. The `:id` is the result of a SHA1 hash over the absolute path to the `.awsu` file. The whole path is logged to `stderr` when invoking `awsu` with the `verbose` parameter.
+The resulting session metadata (regardless of the mode) is cached in `~/.awsu/sessions/:id/:environment.json`. The `:id` is the result of a SHA1 hash over the absolute path to the `.awsu` file. The whole path is logged to `stderr` when invoking `awsu` with the `verbose` parameter (or the `AWSU_VERBOSE` environment variable).
 
 ## Registering Yubikeys
 
