@@ -1,7 +1,7 @@
 VERSION := "2.0.1"
 
 BUILD := $(shell git rev-parse --short HEAD)
-FLAGS	:= "-s -w -X=main.build=$(BUILD) -X=main.version=$(VERSION)"
+FLAGS	:= "-s -w -X=main.build=$(BUILD) -X=main.time=`TZ=UTC date '+%FT%TZ'` -X=main.version=$(VERSION)"
 REPO := awsu
 TOKEN = $(shell cat .token)
 USER := kreuzwerker

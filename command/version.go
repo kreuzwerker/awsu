@@ -7,11 +7,11 @@ import (
 )
 
 type Version struct {
-	Build, Version string
+	Build, Time, Version string
 }
 
 func (v Version) String() string {
-	return fmt.Sprintf("%s version %s (%s)", app, v.Version, v.Build)
+	return fmt.Sprintf("%s version %s (%s, %s)", app, v.Version, v.Build, v.Time)
 }
 
 var versionCmd = &cobra.Command{

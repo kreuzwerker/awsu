@@ -12,9 +12,10 @@ var (
 	this = Version{}
 )
 
-func Execute(version, build string) {
+func Execute(version, build, time string) {
 
 	this.Build = build
+	this.Time = time
 	this.Version = version
 
 	if _, err := rootCmd.ExecuteC(); err != nil {
