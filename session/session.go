@@ -117,6 +117,7 @@ func New(profile string) (*Session, error) {
 		Profile:                 profile,
 		SharedConfigState:       session.SharedConfigEnable,
 	}))
+	tp.Session = sess
 
 	value, err := sess.Config.Credentials.Get()
 
@@ -137,11 +138,11 @@ func New(profile string) (*Session, error) {
 			return nil, err
 		}
 
-		callerIdentityParsed.Resource = strings.Replace(callerIdentityParsed.Resource,"user", "mfa", 1)
+		callerIdentityParsed.Resource = strings.Replace(callerIdentityParsed.Resource, "user", "mfa", 1)
 		mfaSerial := callerIdentityParsed.String()
 
 		mfaToken, err := yubikey.Generate(mfaSerial)
-		if err != nil{
+		if err != nil {
 			return nil, err
 		}
 
@@ -157,9 +158,8 @@ func New(profile string) (*Session, error) {
 			ProviderName:    "STSGetSessionForLongtermCredentials",
 		}
 
-	} else {
-		tp.Session = sess
 	}
+
 
 
 
