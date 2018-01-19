@@ -11,6 +11,14 @@ It has the following additional features:
 * Native support for [Yubikeys](https://www.yubico.com/) as source for TOTP MFA tokens (only when assuming roles)
 * Snap-in replacement for arbitrary tooling with `exec` mode and shell aliases
 
+## Installation
+
+Via [kreuzwerker/homebrew-taps](https://github.com/kreuzwerker/homebrew-taps).
+
+```
+brew install kreuzwerker/taps/awsu
+```
+
 ## Configuring `awsu`
 
 You can choose between two configuration modes with `awsu`: a configuration file mode or an environment variable mode. Both modes map `awsu` workspaces to AWS profiles. The currently used workspace is determined by
