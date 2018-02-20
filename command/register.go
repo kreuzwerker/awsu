@@ -5,10 +5,8 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/kreuzwerker/awsu/yubikey"
-	"github.com/mdp/qrterminal"
 	qr "github.com/mdp/qrterminal"
 	"github.com/spf13/cobra"
 )
@@ -26,7 +24,9 @@ var registerCmd = &cobra.Command{
 
 		username := args[0]
 
-		sess, err := newSession(rootFlags.workspace)
+		sess, err := newSession(rootFlags.noCache,
+			rootFlags.profile,
+			rootFlags.profiles)
 
 		if err != nil {
 			return err
@@ -36,7 +36,7 @@ var registerCmd = &cobra.Command{
 			session.Must(
 				session.NewSession(
 					&aws.Config{
-						Credentials: credentials.NewStaticCredentialsFromCreds(sess.Value),
+						Credentials: sess.Credentials(),
 					},
 				),
 			),
@@ -49,7 +49,7 @@ var registerCmd = &cobra.Command{
 					registerFlags.issuer,
 				)
 
-				qr.Generate(uri, qrterminal.L, os.Stderr)
+				qr.Generate(uri, qr.L, os.Stderr)
 
 			},
 			username,
