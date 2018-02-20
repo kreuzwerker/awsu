@@ -26,6 +26,7 @@ var (
 	errFailedToAssumeRole        = "failed to assume role %q: %s"
 	errFailedToGetCallerIdentity = "failed to get caller identity during MFA autodetection: %s"
 	errFailedToGetSessionToken   = "failed to get session token: %s"
+	errNoMFAFound                = "no MFA found in profile or source profile definition"
 	errNoSuchProfile             = "no such profile %q configured"
 	errNoSuchSourceProfile       = "no such source profile %q configured"
 	expires                      = 1 * time.Hour
@@ -69,16 +70,20 @@ func New(profile string, profiles config.Profiles) (*Session, error) {
 
 		client := sts.New(sess, aws.NewConfig().WithCredentials(session.Credentials()))
 
-		log.Log("get session token on profile %q", lt.Name)
-
 		var mfa string
 
-		if mfa = lt.MFASerial; mfa == "" {
+		if mfa = lt.MFASerial; mfa != "" {
+			log.Log("get session token on profile %q, using MFA from long-term credentials", lt.Name)
+		} else if mfa = st.MFASerial; mfa != "" {
+			log.Log("get session token on profile %q, using MFA from short-term credentials", lt.Name)
+		} else {
 
 			// TODO: autodetection
 
 			// arn:aws:iam::113030722353:user/joern.barthel@kreuzwerker.de vs MFA of
 			// arn:aws:iam::113030722353:mfa/joern.barthel@kreuzwerker.de
+
+			return nil, fmt.Errorf(errNoMFAFound)
 
 		}
 
