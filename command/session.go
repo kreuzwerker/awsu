@@ -4,10 +4,15 @@ import (
 	"os"
 
 	"github.com/kreuzwerker/awsu/config"
+	"github.com/kreuzwerker/awsu/log"
 	"github.com/kreuzwerker/awsu/session"
 )
 
-func newSession(workspace string) (*session.Session, error) {
+func newSession(nocache bool, profile string, profiles config.Profiles) (*session.Session, error) {
+
+	if nocache {
+		return session.New(profile, profiles)
+	}
 
 	cwd, err := os.Getwd()
 
@@ -15,45 +20,36 @@ func newSession(workspace string) (*session.Session, error) {
 		return nil, err
 	}
 
-	cfg := config.Detect()
+	sess, err := session.Load(cwd, profile)
 
-	// if we have no config yet, try to load the file
-	if cfg == nil {
+	if err != nil {
 
-		cfg, err = config.Load(cwd)
+		log.Log("no previous session, creating")
+		return restoreSession(cwd, profile, profiles)
 
-		if err != nil {
-			return nil, err
-		}
+	} else if !sess.IsValid() {
+
+		log.Log("invalid previous session, recreating")
+		return restoreSession(cwd, profile, profiles)
 
 	}
 
-	if workspace == "" {
-		workspace = cfg.DetectWorkspace()
-	}
+	return sess, nil
 
-	profile, err := cfg.Get(workspace)
+}
+
+func restoreSession(cwd string, profile string, profiles config.Profiles) (*session.Session, error) {
+
+	sess, err := session.New(profile, profiles)
 
 	if err != nil {
 		return nil, err
 	}
 
-	sess, err := session.Load(cwd, profile)
-
-	if err != nil || !sess.IsValid() {
-
-		sess, err = session.New(profile)
-
-		if err != nil {
-			return nil, err
-		}
-
-		if err := sess.Save(cwd); err != nil {
-			return nil, err
-		}
-
+	if err = sess.Save(cwd); err != nil {
+		return nil, err
 	}
 
-	return sess, nil
+	return sess, err
 
 }
