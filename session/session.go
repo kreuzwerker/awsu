@@ -16,11 +16,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/kreuzwerker/awsu/log"
 	"github.com/kreuzwerker/awsu/metadata"
 	"github.com/kreuzwerker/awsu/yubikey"
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
 	"github.com/yawn/envmap"
+	"github.com/aws/aws-sdk-go/aws/arn"
 )
 
 type Session struct {
@@ -115,14 +117,53 @@ func New(profile string) (*Session, error) {
 		Profile:                 profile,
 		SharedConfigState:       session.SharedConfigEnable,
 	}))
-
 	tp.Session = sess
 
 	value, err := sess.Config.Credentials.Get()
 
+
 	if err != nil {
 		return nil, err
 	}
+
+	if value.SessionToken == "" {
+
+		callerIdentityArn, err := getCalleridentityArn(sess)
+		if err != nil {
+			return nil, err
+		}
+
+		callerIdentityParsed, err := arn.Parse(*callerIdentityArn)
+		if err != nil {
+			return nil, err
+		}
+
+		callerIdentityParsed.Resource = strings.Replace(callerIdentityParsed.Resource, "user", "mfa", 1)
+		mfaSerial := callerIdentityParsed.String()
+
+		mfaToken, err := yubikey.Generate(mfaSerial)
+		if err != nil {
+			return nil, err
+		}
+
+		sessionToken, err := getSessionToken(sess, mfaSerial, &mfaToken)
+		if err != nil {
+			return nil, err
+		}
+
+		value = credentials.Value{
+			AccessKeyID:     *sessionToken.AccessKeyId,
+			SecretAccessKey: *sessionToken.SecretAccessKey,
+			SessionToken:    *sessionToken.SessionToken,
+			ProviderName:    "STSGetSessionForLongtermCredentials",
+		}
+
+	}
+
+
+
+
+
 
 	session := &Session{
 		Expires:  time.Now().Add(stscreds.DefaultDuration),
@@ -133,6 +174,32 @@ func New(profile string) (*Session, error) {
 
 	return session, nil
 
+}
+
+func getSessionToken(sess *session.Session, mfaSerial string, mfaToken *string) (*sts.Credentials, error) {
+	stssvc := sts.New(sess)
+	duration := int64((1 * time.Hour).Seconds())
+	serialNumber := mfaSerial
+	output, err := stssvc.GetSessionToken(&sts.GetSessionTokenInput{
+		DurationSeconds: &duration,
+		SerialNumber: &serialNumber,
+		TokenCode: mfaToken,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return output.Credentials, nil
+
+}
+
+func getCalleridentityArn(sess * session.Session) (*string, error) {
+	stssvc := sts.New(sess)
+	input := &sts.GetCallerIdentityInput{}
+	result, err := stssvc.GetCallerIdentity(input)
+	if err != nil {
+		return nil, err
+	}
+	return result.Arn, nil
 }
 
 func Load(dir, profile string) (*Session, error) {
