@@ -34,8 +34,10 @@ var (
 
 type Session struct {
 	credentials.Value
-	Expires time.Time
-	Profile string
+	Expires   time.Time
+	Profile   string
+	LongTerm  *Credentials
+	ShortTerm *Credentials
 }
 
 // New creates a new session with the given profile, using the passed in profiles
@@ -68,42 +70,64 @@ func New(profile string, profiles config.Profiles) (*Session, error) {
 
 	{
 
+		// https: //docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_request.html
+
 		client := sts.New(sess, aws.NewConfig().WithCredentials(session.Credentials()))
 
 		var mfa string
 
 		if mfa = lt.MFASerial; mfa != "" {
 			log.Log("get session token on profile %q, using MFA from long-term credentials", lt.Name)
-		} else if mfa = st.MFASerial; mfa != "" {
-			log.Log("get session token on profile %q, using MFA from short-term credentials", lt.Name)
+		} else if st != nil {
+
+			if mfa = st.MFASerial; mfa != "" {
+				log.Log("get session token on profile %q, using MFA from short-term credentials", lt.Name)
+			}
+
+		}
+
+		//
+		// else {
+		//
+		// 	// TODO: autodetection
+		//
+		// 	// arn:aws:iam::113030722353:user/joern.barthel@kreuzwerker.de vs MFA of
+		// 	// arn:aws:iam::113030722353:mfa/joern.barthel@kreuzwerker.de
+		//
+		// 	return nil, fmt.Errorf(errNoMFAFound)
+		//
+		// }
+
+		req := &sts.GetSessionTokenInput{
+			DurationSeconds: aws.Int64(int64(expires.Seconds())),
+		}
+
+		if mfa != "" {
+
+			token, err := yubikey.Generate(mfa)
+
+			if err != nil {
+				return nil, err
+			}
+
+			req.SerialNumber = &mfa
+			req.TokenCode = &token
+
+			res, err := client.GetSessionToken(req)
+
+			if err != nil {
+				return nil, fmt.Errorf(errFailedToGetSessionToken, err)
+			}
+
+			session.setCredentials(res.Credentials)
+
 		} else {
 
-			// TODO: autodetection
-
-			// arn:aws:iam::113030722353:user/joern.barthel@kreuzwerker.de vs MFA of
-			// arn:aws:iam::113030722353:mfa/joern.barthel@kreuzwerker.de
-
-			return nil, fmt.Errorf(errNoMFAFound)
+			session.AccessKeyID = lt.AccessKeyID
+			session.SecretAccessKey = lt.SecretAccessKey
+			session.Expires = time.Now()
 
 		}
-
-		token, err := yubikey.Generate(mfa)
-
-		if err != nil {
-			return nil, err
-		}
-
-		res, err := client.GetSessionToken(&sts.GetSessionTokenInput{
-			DurationSeconds: aws.Int64(int64(expires.Seconds())),
-			SerialNumber:    &mfa,
-			TokenCode:       &token,
-		})
-
-		if err != nil {
-			return nil, fmt.Errorf(errFailedToGetSessionToken, err)
-		}
-
-		session.setCredentials(res.Credentials)
 
 	}
 
@@ -206,6 +230,8 @@ func Load(dir, profile string) (*Session, error) {
 
 // Save caches a session
 func (s *Session) Save(dir string) error {
+
+	// TODO: don't save if long-term!
 
 	path, err := sessionPath(dir, s.Profile)
 
