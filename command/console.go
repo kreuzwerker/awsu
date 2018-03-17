@@ -24,15 +24,13 @@ var consoleCmd = &cobra.Command{
 	Short: "Generates link to or opens AWS console",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		sess, err := newSession(rootFlags.noCache,
-			rootFlags.profile,
-			rootFlags.profiles)
+		creds, err := newSession(rootConfig)
 
 		if err != nil {
 			return err
 		}
 
-		profile := rootFlags.profiles[rootFlags.profile]
+		profile := rootConfig.Profiles[rootConfig.Profile]
 
 		// TODO: move the whole logic to a "console" package
 		if profile.ExternalID == "" {
@@ -57,9 +55,9 @@ var consoleCmd = &cobra.Command{
 		} else {
 
 			fep := map[string]string{
-				"sessionId":    sess.AccessKeyID,
-				"sessionKey":   sess.SessionToken,
-				"sessionToken": sess.SessionToken,
+				"sessionId":    creds.AccessKeyID,
+				"sessionKey":   creds.SessionToken,
+				"sessionToken": creds.SessionToken,
 			}
 
 			enc, err := json.Marshal(fep)

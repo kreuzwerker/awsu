@@ -21,9 +21,9 @@ var listCmd = &cobra.Command{
 	Short: "List all configured profiles",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		reports := make(map[string]listOutput, len(rootFlags.profiles))
+		reports := make(map[string]listOutput, len(rootConfig.Profiles))
 
-		for _, profile := range rootFlags.profiles {
+		for _, profile := range rootConfig.Profiles {
 
 			var report = listOutput{
 				MFA: profile.MFASerial != "",
