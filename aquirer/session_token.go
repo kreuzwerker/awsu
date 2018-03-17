@@ -44,7 +44,7 @@ func (s *SessionToken) Credentials(sess *session.Session) (*Credentials, error) 
 
 	}
 
-	// TODO: try autodetection as a last resort
+	// TODO: try autodetection as a last resort OR just don't get a session token?
 	if serialNumber == "" {
 		return nil, errors.New(errSessionTokenWithoutMFA)
 	}
