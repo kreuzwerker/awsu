@@ -11,7 +11,15 @@ It has the following features:
 * Optional caching for temporary credentials
 * Snap-in replacement for arbitrary tooling with `exec` mode and shell aliases
 
-## Requirements
+## Installation
+
+Install it via [kreuzwerker/homebrew-taps](https://github.com/kreuzwerker/homebrew-taps) or from the release tab on Github.
+
+```
+brew install kreuzwerker/taps/awsu
+```
+
+### Requirements
 
 * `ykman` for interacting with Yubikeys (https://github.com/Yubico/yubikey-manager)
 
