@@ -1,4 +1,4 @@
-VERSION := "2.0.2"
+VERSION := "2.1.0"
 
 BUILD := $(shell git rev-parse --short HEAD)
 FLAGS	:= "-s -w -X=main.build=$(BUILD) -X=main.time=`TZ=UTC date '+%FT%TZ'` -X=main.version=$(VERSION)"

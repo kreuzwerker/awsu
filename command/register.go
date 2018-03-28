@@ -4,11 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/kreuzwerker/awsu/yubikey"
-	"github.com/mdp/qrterminal"
 	qr "github.com/mdp/qrterminal"
 	"github.com/spf13/cobra"
 )
@@ -19,37 +16,30 @@ var registerFlags = struct {
 
 var registerCmd = &cobra.Command{
 
-	Use:   "register",
+	Use:   "register :username",
 	Short: "Initializes an device on AWS and Yubikey",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		username := args[0]
 
-		sess, err := newSession(rootFlags.workspace)
+		creds, err := newSession(rootConfig)
 
 		if err != nil {
 			return err
 		}
 
-		arn, err := yubikey.NewMFA(
-			session.Must(
-				session.NewSession(
-					&aws.Config{
-						Credentials: credentials.NewStaticCredentialsFromCreds(sess.Value),
-					},
-				),
-			),
+		arn, err := yubikey.NewMFA(creds.UpdateSession(session.Must(session.NewSession())),
 			func(secret string) {
 
 				uri := fmt.Sprintf("otpauth://totp/%s@%s?secret=%s&issuer=%s",
 					username,
-					sess.Profile,
+					creds.Profile,
 					secret,
 					registerFlags.issuer,
 				)
 
-				qr.Generate(uri, qrterminal.L, os.Stderr)
+				qr.Generate(uri, qr.L, os.Stderr)
 
 			},
 			username,

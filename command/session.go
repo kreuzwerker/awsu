@@ -1,59 +1,111 @@
 package command
 
 import (
-	"os"
+	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/kreuzwerker/awsu/aquirer"
 	"github.com/kreuzwerker/awsu/config"
-	"github.com/kreuzwerker/awsu/session"
+	"github.com/kreuzwerker/awsu/log"
 )
 
-func newSession(workspace string) (*session.Session, error) {
+const (
+	errProfileAquisitionFailed = "failed to aquire credentials for profile %q: %s"
+	errProfileCacheLoadExpired = "ignoring expired cached profile %q"
+	errProfileCacheLoadFailed  = "failed to load cached profile %q: %s"
+	errProfileCacheSaveFailed  = "failed to save cached profile %q: %s"
+	errProfileNotFound         = "no such profile %q configured"
+	msgAquirerWithProfile      = "using aquirer %q (cache: %t) for profile %q"
+)
 
-	cwd, err := os.Getwd()
+func newSession(cfg *config.Config) (*aquirer.Credentials, error) {
 
-	if err != nil {
-		return nil, err
+	var (
+		sess   = session.Must(session.NewSession())
+		source *config.Profile
+		target = cfg.Profiles[cfg.Profile]
+	)
+
+	if target == nil {
+		return nil, fmt.Errorf(errProfileNotFound, cfg.Profile)
 	}
 
-	cfg := config.Detect()
+	source = cfg.Profiles[target.SourceProfile]
 
-	// if we have no config yet, try to load the file
-	if cfg == nil {
+	aquirers := []aquirer.Aquirer{
+		&aquirer.LongTerm{
+			Profiles: []*config.Profile{source, target},
+		},
+		&aquirer.SessionToken{
+			Duration: cfg.SessionTTL,
+			Grace:    cfg.SessionTTL / 2,
+			Profiles: []*config.Profile{source, target},
+		},
+		&aquirer.AssumeRole{
+			Duration: cfg.CacheTTL,
+			Grace:    cfg.CacheTTL / 2,
+			Profiles: []*config.Profile{source, target},
+		},
+	}
 
-		cfg, err = config.Load(cwd)
+	var last *aquirer.Credentials
 
-		if err != nil {
-			return nil, err
+	for _, a := range aquirers {
+
+		var current *aquirer.Credentials
+
+		profile := a.Profile()
+
+		if profile == nil {
+			continue
 		}
 
-	}
+		cache := !cfg.NoCache && a.IsCacheable()
 
-	if workspace == "" {
-		workspace = cfg.DetectWorkspace()
-	}
+		log.Log(msgAquirerWithProfile, a.Name(), cache, profile.Name)
 
-	profile, err := cfg.Get(workspace)
+		// try to load
+		if cache {
 
-	if err != nil {
-		return nil, err
-	}
+			creds, err := aquirer.LoadCredentials(profile.Name)
 
-	sess, err := session.Load(cwd, profile)
+			if err != nil {
+				log.Log(errProfileCacheLoadFailed, profile.Name, err)
+			} else if !creds.IsValid() {
+				log.Log(errProfileCacheLoadExpired, profile.Name)
+			} else {
+				current = creds
+			}
 
-	if err != nil || !sess.IsValid() {
-
-		sess, err = session.New(profile)
-
-		if err != nil {
-			return nil, err
 		}
 
-		if err := sess.Save(cwd); err != nil {
-			return nil, err
+		// try to aquire
+		if current == nil {
+
+			creds, err := a.Credentials(sess)
+
+			if err != nil {
+				return nil, fmt.Errorf(errProfileAquisitionFailed, profile.Name, err)
+			}
+
+			current = creds
+
+			// try to save
+			if cache {
+
+				if err := current.Save(); err != nil {
+					return nil, fmt.Errorf(errProfileCacheSaveFailed, profile.Name, err)
+				}
+
+			}
+
 		}
+
+		last = current
+		sess = current.UpdateSession(sess)
 
 	}
 
-	return sess, nil
+	return last, nil
 
 }

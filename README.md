@@ -1,66 +1,45 @@
 # Amazon Web Services Switch User (`awsu`)
 
-`awsu` is a binary that maps application environments to AWS profiles (e.g. from `~/.aws/config`).
+`awsu` is a client-tool for advanced STS session token and role handling.  
 
-It has the following additional features:
+It has the following features:
 
 * Support for long-term (IAM) and short-term credentials via internal, cross-account and external roles
-* Automapping of environments to / Terraform [Terraform](https://www.terraform.io/) [workspaces](https://www.terraform.io/docs/state/workspaces.html)
-* Configuration through environment variables or project-specific configuration files
-* Console access for external and federated roles
-* Native support for [Yubikeys](https://www.yubico.com/) as source for TOTP MFA tokens (only when assuming roles)
+* Configuration through environment variables or flags
+* Console access for roles
+* Native support for [Yubikeys](https://www.yubico.com/) as source for TOTP MFA tokens - currently `awsu` will always try to assume a session token (passing in the MFA from a Yubikey) regardless of the profiles used; it searches for the `mfa_serial` first in the role profile (if available) and then in the source profile
+* Optional caching for temporary credentials
 * Snap-in replacement for arbitrary tooling with `exec` mode and shell aliases
 
 ## Installation
 
-Via [kreuzwerker/homebrew-taps](https://github.com/kreuzwerker/homebrew-taps).
+Install it via [kreuzwerker/homebrew-taps](https://github.com/kreuzwerker/homebrew-taps) or from the release tab on Github.
 
 ```
 brew install kreuzwerker/taps/awsu
 ```
 
-## Configuring `awsu`
+### Requirements
 
-You can choose between two configuration modes with `awsu`: a configuration file mode or an environment variable mode. Both modes map `awsu` workspaces to AWS profiles. The currently used workspace is determined by
+* `ykman` for interacting with Yubikeys (https://github.com/Yubico/yubikey-manager)
 
-1. the `--workspace` flag passed to `awsu` or
-2. the `TF_WORKSPACE` environment variable or
-3. the `AWSU_WORKSPACE` environment variable or
-4. the current Terraform workspace
-5. `default`
+## Configuration
 
-### Configuration via environment
+Working with `awsu` requires a configured [shared credentials file](https://aws.amazon.com/blogs/security/a-new-and-standardized-way-to-manage-credentials-in-the-aws-sdks/).
 
-This mode works by setting `AWSU_PROFILE_:WORKSPACE` environment variables to values that correspond to an AWS profile.
+With an existing file in place `awsu` can be configured to use a certain profile using the `-p` flag or environment variables.
 
-Example:
-
-```
-export AWSU_PROFILE_DEFAULT=sandbox
-export AWSU_PROFILE_PRODUCTION=live
-```
-
-### Configuration via configuration file
-
-This mode works by creating a `.awsu` INI file config in each project directory where you want to call `awsu`. Inside this file
-
-1. add a `[profiles]` section
-2. add every workspace as key and the matching AWS profile as value
-
-Example:
-
-```
-[profiles]
-
-default     = sandbox
-production  = production
-```
+* Profiles can be choosen with `-p` or `AWS_PROFILE` (SDK standard)
+* Shared credentials location can be overridden from it's default (e.g. `~/.aws/credentials`) using `AWS_SHARED_CREDENTIALS_FILE` (SDK standard)
+* Caching can be disabled with `-n` or `AWSU_NO_CACHE`
+* Cache TTLs and the session length for session tokens and roles can be choosen with `AWSU_CACHE_SESSION_TOKEN_TTL` and `AWSU_CACHE_ROLE_TTL` - after half of that TTL has expired the cached files are considered invalid and will be refreshed; this is done to avoid issues during long running operations
+* Logging can be enabled with `-v` or `AWSU_VERBOSE`
 
 ## Running `awsu`
 
-`awsu` can be run in two modes: export and exec. `awsu` always tries to assume roles for the maximum amount of time (60 minutes).
+`awsu` main mode can be run in two flavors: export and exec.
 
-### Export mode
+### Export
 
 When `awsu` is invoked without additional arguments, the resulting credentials are exposed as shell exports. In this mode, `awsu` can be used with `eval` to actually set these variables like this:
 
@@ -70,7 +49,7 @@ eval $(awsu)
 
 After using export mode, credentials can used until they expire.
 
-### Exec mode
+### Exec
 
 When `awsu` is invoked with a doubledash (`--`) as the last argument it will execute the application specified after the doubledash (including all arguments) with the resulting credentials being set into the environment of this application.
 
@@ -81,10 +60,6 @@ alias aws="awsu -v -- aws"
 alias terraform="awsu -v -- terraform"
 # etc ...
 ```
-
-## Caching
-
-The resulting session metadata (regardless of the mode) is cached in `~/.awsu/sessions/:id/:environment.json`. The `:id` is the result of a SHA1 hash over the absolute path to the `.awsu` file. The whole path is logged to `stderr` when invoking `awsu` with the `verbose` parameter (or the `AWSU_VERBOSE` environment variable).
 
 ## Registering Yubikeys
 
@@ -102,7 +77,7 @@ Afterwards successful registration `awsu` will
 
 Note: the QR code has a slightly non-standard key-uri-format: `otpauth://totp/:username@:profile?secret=:secret&issuer=Amazon`. This makes certain authenticator apps understand which icon to pick and matches the IAM username directly to the used profile.
 
-### Configure MFA as part of aws-cli
+### Configure MFA in the shared credentials file
 
 After the setting up the MFA device you can configure `aws-cli` to use MFA in the following way:
 
