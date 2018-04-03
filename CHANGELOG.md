@@ -2,7 +2,13 @@
 
 All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will be documented in this file.
 
-## Unreleased [2.1.0]
+## [2.1.1]
+
+### Changed
+
+- Fixed #21 (Don’t get session token w/o MFA)
+
+## [2.1.0]
 
 ### Changed
 
