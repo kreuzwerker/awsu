@@ -1,7 +1,6 @@
 package aquirer
 
 import (
-	"errors"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -25,13 +24,7 @@ type SessionToken struct {
 	Profiles []*config.Profile
 }
 
-func (s *SessionToken) Credentials(sess *session.Session) (*Credentials, error) {
-
-	var (
-		client       = sts.New(sess)
-		serialNumber string
-		lt           = s.Profile()
-	)
+func (s *SessionToken) serialNumber() (serialNumber string) {
 
 	// find the MFA
 	for _, profile := range s.Profiles {
@@ -46,8 +39,20 @@ func (s *SessionToken) Credentials(sess *session.Session) (*Credentials, error) 
 
 	// TODO: try autodetection as a last resort OR just don't get a session token?
 	if serialNumber == "" {
-		return nil, errors.New(errSessionTokenWithoutMFA)
+		//
 	}
+
+	return
+
+}
+
+func (s *SessionToken) Credentials(sess *session.Session) (*Credentials, error) {
+
+	var (
+		client       = sts.New(sess)
+		lt           = s.Profile()
+		serialNumber = s.serialNumber()
+	)
 
 	log.Log("getting session token for profile %q and serial %q", lt.Name, serialNumber)
 
@@ -91,7 +96,7 @@ func (s *SessionToken) Profile() *config.Profile {
 
 	for _, profile := range s.Profiles {
 
-		if profile != nil && profile.IsLongTerm() {
+		if profile != nil && profile.IsLongTerm() && s.serialNumber() != "" {
 			return profile
 		}
 
