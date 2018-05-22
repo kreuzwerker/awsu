@@ -68,7 +68,7 @@ func init() {
 
 	os.Args = doubledash.Args
 
-	rootCmd.PersistentFlags().DurationP(config.KeyCacheTTL, "t", 15*time.Minute, "time to live for cached role credentials")
+	rootCmd.PersistentFlags().DurationP(config.KeyCacheTTL, "t", 8*time.Hour, "time to live for cached role credentials")
 	viper.BindPFlag(config.KeyCacheTTL, rootCmd.PersistentFlags().Lookup(config.KeyCacheTTL))
 	viper.BindEnv(config.KeyCacheTTL, "AWSU_CACHE_ROLE_TTL")
 
@@ -85,7 +85,7 @@ func init() {
 	viper.BindEnv(config.KeyProfile, "AWS_PROFILE")
 	viper.SetDefault(config.KeyProfile, "default")
 
-	rootCmd.PersistentFlags().DurationP(config.KeySessionTTL, "s", 15*time.Minute, "time to live for cached session token credentials")
+	rootCmd.PersistentFlags().DurationP(config.KeySessionTTL, "s", 8*time.Hour, "time to live for cached session token credentials")
 	viper.BindPFlag(config.KeySessionTTL, rootCmd.PersistentFlags().Lookup(config.KeySessionTTL))
 	viper.BindEnv(config.KeySessionTTL, "AWSU_CACHE_SESSION_TOKEN_TTL")
 
