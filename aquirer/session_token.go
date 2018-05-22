@@ -77,7 +77,7 @@ func (s *SessionToken) Credentials(sess *session.Session) (*Credentials, error) 
 		*res.Credentials.AccessKeyId,
 		*res.Credentials.SecretAccessKey,
 		*res.Credentials.SessionToken,
-		time.Now().Add(s.Duration),
+		time.Now().Add(s.Duration).Add(s.Grace*-1),
 	)
 
 	return creds, nil

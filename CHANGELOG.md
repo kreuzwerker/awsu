@@ -2,6 +2,13 @@
 
 All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will be documented in this file.
 
+## [2.2.0]
+
+### Changed
+
+- Fixed #23 (Increase role and session token duration)
+- Fixed bug with missing grace period in session token
+
 ## [2.1.1]
 
 ### Changed
