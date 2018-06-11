@@ -19,6 +19,8 @@ Install it via [kreuzwerker/homebrew-taps](https://github.com/kreuzwerker/homebr
 brew install kreuzwerker/taps/awsu
 ```
 
+Alternativelly you can download the releases from Github and copy the executable to e.g. `/usr/local/bin/awsu`. If you do so don't forget to set the excecution bit with `chmod a+x /usr/local/bin/awsu`.
+
 ### Requirements
 
 * `ykman` for interacting with Yubikeys (https://github.com/Yubico/yubikey-manager)
