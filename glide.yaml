@@ -8,7 +8,7 @@ import:
   - aws/credentials/stscreds
   - aws/session
 - package: github.com/joshdk/ykmango
-  version: ^0.0.0
+  version: master
 - package: github.com/pkg/errors
   version: ^0.8.0
 - package: github.com/skratchdot/open-golang

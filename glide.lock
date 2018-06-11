@@ -1,8 +1,8 @@
-hash: 4b3a0d00e18bbac452426845dbc4e8084b825d69d3c87079d59f54af8f403d95
-updated: 2018-03-17T17:58:55.724747+01:00
+hash: 56046d32d0f8d5c843bb72874365c70b18de33659bb48ef70292537d0b03d24b
+updated: 2018-06-11T19:48:55.222998199+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: f0872da8a448f8cb10f4f0c95c2100e4f7356448
+  version: c9af76f2478f81c6566d0f7f4d522254ec7c0b52
   subpackages:
   - aws
   - aws/arn
@@ -15,6 +15,7 @@ imports:
   - aws/credentials/ec2rolecreds
   - aws/credentials/endpointcreds
   - aws/credentials/stscreds
+  - aws/csm
   - aws/defaults
   - aws/ec2metadata
   - aws/endpoints
@@ -53,11 +54,11 @@ imports:
 - name: github.com/jmespath/go-jmespath
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
 - name: github.com/joshdk/ykmango
-  version: b6db46b695a610f2e5a91bd994fce833cb1580f1
+  version: b656c992234c13a22221a2020f7535ac81a47187
 - name: github.com/magiconair/properties
   version: be5ece7dd465ab0765a9682137865547526d1dfb
 - name: github.com/mdp/qrterminal
-  version: cf8d9d6f3fe59f7838802a258192a926d33b0385
+  version: 23b48afd7c2267f7d331776a6fd455560d7da691
 - name: github.com/mitchellh/go-homedir
   version: b8bc1bf767474819792c23f32d8286a45736f1c6
 - name: github.com/mitchellh/mapstructure
@@ -100,7 +101,7 @@ imports:
   - transform
   - unicode/norm
 - name: gopkg.in/ini.v1
-  version: 6333e38ac20b8949a8dd68baa3650f4dee8f39f0
+  version: 06f5f3d67269ccec1fe5fe4134ba6e982984f7f5
 - name: gopkg.in/yaml.v2
   version: 1be3d31502d6eabc0dd7ce5b0daab022e14a5538
 - name: rsc.io/qr
@@ -118,6 +119,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 12b6f73e6084dad08a7c6e575284b177ecafbc71
+  version: f35b8ab0b5a2cef36673838d662e249dd9c94686
   subpackages:
   - assert
