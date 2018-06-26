@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/kreuzwerker/awsu/yubikey"
+	"github.com/kreuzwerker/awsu/generator/yubikey"
 	qr "github.com/mdp/qrterminal"
 	"github.com/spf13/cobra"
 )

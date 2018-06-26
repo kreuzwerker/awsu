@@ -9,6 +9,7 @@ import (
 const (
 	KeyCacheTTL              = "cache-ttl"
 	KeyConfigFile            = "config-file"
+	KeyGenerator             = "generator"
 	KeyMFASerial             = "mfa-serial"
 	KeyNoCache               = "no-cache"
 	KeyProfile               = "profile"
@@ -20,6 +21,7 @@ const (
 type Config struct {
 	CacheTTL              time.Duration
 	ConfigFile            string
+	Generator             string
 	MFASerial             string
 	NoCache               bool
 	Profile               string
@@ -33,8 +35,9 @@ func NewConfig() *Config {
 
 	return &Config{
 		CacheTTL:              viper.GetDuration(KeyCacheTTL),
-		MFASerial:             viper.GetString(KeyMFASerial),
 		ConfigFile:            viper.GetString(KeyConfigFile),
+		Generator:             viper.GetString(KeyGenerator),
+		MFASerial:             viper.GetString(KeyMFASerial),
 		NoCache:               viper.GetBool(KeyNoCache),
 		Profile:               viper.GetString(KeyProfile),
 		SessionTTL:            viper.GetDuration(KeySessionTTL),

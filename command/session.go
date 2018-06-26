@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/kreuzwerker/awsu/aquirer"
 	"github.com/kreuzwerker/awsu/config"
+	"github.com/kreuzwerker/awsu/generator"
 	"github.com/kreuzwerker/awsu/log"
 )
 
@@ -38,6 +39,7 @@ func newSession(cfg *config.Config) (*aquirer.Credentials, error) {
 		},
 		&aquirer.SessionToken{
 			Duration:  cfg.SessionTTL,
+			Generator: generator.Name(cfg.Generator),
 			Grace:     cfg.SessionTTL / 2,
 			MFASerial: cfg.MFASerial,
 			Profiles:  []*config.Profile{source, target},
