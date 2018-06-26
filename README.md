@@ -1,6 +1,6 @@
 # Amazon Web Services Switch User (`awsu`)
 
-`awsu` is a client-tool for advanced STS session token and role handling.  
+`awsu` is a client-tool for advanced STS session token and role handling.
 
 It has the following features:
 
@@ -34,7 +34,7 @@ With an existing file in place `awsu` can be configured to use a certain profile
 * Profiles can be choosen with `-p` or `AWS_PROFILE` (SDK standard)
 * Shared credentials location can be overridden from it's default (e.g. `~/.aws/credentials`) using `AWS_SHARED_CREDENTIALS_FILE` (SDK standard)
 * Caching can be disabled with `-n` or `AWSU_NO_CACHE`
-* Cache TTLs and the session length for session tokens and roles can be choosen with `AWSU_CACHE_SESSION_TOKEN_TTL` (default 8h) and `AWSU_CACHE_ROLE_TTL` (default 8h) - after half of that TTL has expired the cached files are considered invalid and will be refreshed; this is done to avoid issues during long running operations
+* Cache TTLs and the session length for session tokens and roles can be choosen with `AWSU_CACHE_SESSION_TOKEN_TTL` (default 8h) and `AWSU_CACHE_ROLE_TTL` (default 1h) - after half of that TTL has expired the cached files are considered invalid and will be refreshed; this is done to avoid issues during long running operations
 * Logging can be enabled with `-v` or `AWSU_VERBOSE`
 
 ## Running `awsu`

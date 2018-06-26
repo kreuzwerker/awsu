@@ -68,7 +68,7 @@ func init() {
 
 	os.Args = doubledash.Args
 
-	rootCmd.PersistentFlags().DurationP(config.KeyCacheTTL, "t", 8*time.Hour, "time to live for cached role credentials")
+	rootCmd.PersistentFlags().DurationP(config.KeyCacheTTL, "t", 1*time.Hour, "time to live for cached role credentials")
 	viper.BindPFlag(config.KeyCacheTTL, rootCmd.PersistentFlags().Lookup(config.KeyCacheTTL))
 	viper.BindEnv(config.KeyCacheTTL, "AWSU_CACHE_ROLE_TTL")
 

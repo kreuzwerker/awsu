@@ -2,6 +2,12 @@
 
 All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will be documented in this file.
 
+## [2.2.1]
+
+### Changed
+
+- Fixed #26 and #27 (Limit role credential duration to AWS default of 1 hour)
+
 ## [2.2.0]
 
 ### Changed
