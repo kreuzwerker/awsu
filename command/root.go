@@ -18,6 +18,7 @@ var rootConfig *config.Config
 var rootFlags = struct {
 	cacheTTL              time.Duration
 	configFile            string
+	mfaSerial             string
 	noCache               bool
 	profile               string
 	sessionTTL            time.Duration
@@ -74,6 +75,10 @@ func init() {
 
 	viper.BindEnv(config.KeyConfigFile, "AWS_CONFIG_FILE")
 	viper.SetDefault(config.KeyConfigFile, defaults.SharedCredentialsFilename())
+
+	rootCmd.PersistentFlags().StringVarP(&rootFlags.mfaSerial, config.KeyMFASerial, "m", "", "set or override MFA serial")
+	viper.BindPFlag(config.KeyMFASerial, rootCmd.PersistentFlags().Lookup(config.KeyMFASerial))
+	viper.BindEnv(config.KeyMFASerial, "AWSU_MFA_SERIAL")
 
 	rootCmd.PersistentFlags().BoolVarP(&rootFlags.noCache, config.KeyNoCache, "n", false, "disable caching of short-term credentials")
 	viper.BindPFlag(config.KeyNoCache, rootCmd.PersistentFlags().Lookup(config.KeyNoCache))

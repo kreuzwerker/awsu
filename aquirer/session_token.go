@@ -19,30 +19,38 @@ const (
 var tokenSource = yubikey.Generate
 
 type SessionToken struct {
-	Duration time.Duration
-	Grace    time.Duration
-	Profiles []*config.Profile
+	Duration      time.Duration
+	Grace         time.Duration
+	MFASerial     string // override or set explicitly
+	Profiles      []*config.Profile
+	_serialNumber string
 }
 
-func (s *SessionToken) serialNumber() (serialNumber string) {
+func (s *SessionToken) serialNumber() string {
+
+	if s._serialNumber != "" {
+		return s._serialNumber
+	}
+
+	if s._serialNumber = s.MFASerial; s._serialNumber != "" {
+		log.Log("using explicitly supplied MFA serial")
+		return s._serialNumber
+	}
 
 	// find the MFA
 	for _, profile := range s.Profiles {
 
 		if profile != nil && profile.MFASerial != "" {
-			serialNumber = profile.MFASerial
-			log.Log("using %q for MFA serial", profile.Name)
-			break
+			s._serialNumber = profile.MFASerial
+			log.Log("using %q profile for MFA serial", profile.Name)
+			return s._serialNumber
 		}
 
 	}
 
 	// TODO: try autodetection as a last resort OR just don't get a session token?
-	if serialNumber == "" {
-		//
-	}
 
-	return
+	return s._serialNumber
 
 }
 

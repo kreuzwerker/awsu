@@ -37,9 +37,10 @@ func newSession(cfg *config.Config) (*aquirer.Credentials, error) {
 			Profiles: []*config.Profile{source, target},
 		},
 		&aquirer.SessionToken{
-			Duration: cfg.SessionTTL,
-			Grace:    cfg.SessionTTL / 2,
-			Profiles: []*config.Profile{source, target},
+			Duration:  cfg.SessionTTL,
+			Grace:     cfg.SessionTTL / 2,
+			MFASerial: cfg.MFASerial,
+			Profiles:  []*config.Profile{source, target},
 		},
 		&aquirer.AssumeRole{
 			Duration: cfg.CacheTTL,
