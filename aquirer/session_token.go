@@ -1,14 +1,15 @@
 package aquirer
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/kreuzwerker/awsu/config"
+	"github.com/kreuzwerker/awsu/generator"
 	"github.com/kreuzwerker/awsu/log"
-	"github.com/kreuzwerker/awsu/yubikey"
 )
 
 const (
@@ -16,33 +17,40 @@ const (
 	errSessionTokenOnUnsuitableProfiles = "failed to get session token on unsuitable profiles: at least one long-term keypair must be configured"
 )
 
-var tokenSource = yubikey.Generate
-
 type SessionToken struct {
-	Duration time.Duration
-	Grace    time.Duration
-	Profiles []*config.Profile
+	Duration      time.Duration
+	Generator     generator.Name
+	Grace         time.Duration
+	MFASerial     string // override or set explicitly
+	Profiles      []*config.Profile
+	_serialNumber string
 }
 
-func (s *SessionToken) serialNumber() (serialNumber string) {
+func (s *SessionToken) serialNumber() string {
+
+	if s._serialNumber != "" {
+		return s._serialNumber
+	}
+
+	if s._serialNumber = s.MFASerial; s._serialNumber != "" {
+		log.Log("using explicitly supplied MFA serial")
+		return s._serialNumber
+	}
 
 	// find the MFA
 	for _, profile := range s.Profiles {
 
 		if profile != nil && profile.MFASerial != "" {
-			serialNumber = profile.MFASerial
-			log.Log("using %q for MFA serial", profile.Name)
-			break
+			s._serialNumber = profile.MFASerial
+			log.Log("using %q profile for MFA serial", profile.Name)
+			return s._serialNumber
 		}
 
 	}
 
 	// TODO: try autodetection as a last resort OR just don't get a session token?
-	if serialNumber == "" {
-		//
-	}
 
-	return
+	return s._serialNumber
 
 }
 
@@ -56,7 +64,13 @@ func (s *SessionToken) Credentials(sess *session.Session) (*Credentials, error) 
 
 	log.Log("getting session token for profile %q and serial %q", lt.Name, serialNumber)
 
-	token, err := tokenSource(serialNumber)
+	generator, ok := generator.Generators[s.Generator]
+
+	if !ok {
+		return nil, fmt.Errorf("unknown generator %q", s.Generator)
+	}
+
+	token, err := generator(serialNumber)
 
 	if err != nil {
 		return nil, err
