@@ -4,6 +4,11 @@ All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will 
 
 ## [2.2.1]
 
+### Added
+
+- The MFA serial can now additionally be specified using `-m`, `--mfa-serial` or `AWSU_MFA_SERIAL`
+- A new generator (next to the default `yubikey`) called `manual` has been exposed using `-g`, `--generator` or `AWSU_TOKEN_GENERATOR` - this can be used to manually enter tokens for scenarios where roles are used in contexts where IAM policy [conditions](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_sample-policies.html#ExampleMFADenyNotRecent) don't prevent the usage of tokens that are older than e.g. 1 hour
+
 ### Changed
 
 - Fixed #26 and #27 (Limit role credential duration to AWS default of 1 hour)
