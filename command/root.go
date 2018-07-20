@@ -25,6 +25,7 @@ var rootFlags = struct {
 	sessionTTL            time.Duration
 	sharedCredentialsFile string
 	verbose               bool
+  docker                bool
 }{}
 
 var rootCmd = &cobra.Command{
@@ -59,7 +60,7 @@ var rootCmd = &cobra.Command{
 			return creds.Exec(doubledash.Xtra[0], doubledash.Xtra)
 		}
 
-		fmt.Println(creds.String())
+		fmt.Println(creds.String(rootConfig.Docker))
 
 		return nil
 
@@ -105,5 +106,9 @@ func init() {
 	rootCmd.PersistentFlags().BoolP(config.KeyVerbose, "v", false, "enable verbose operations")
 	viper.BindPFlag(config.KeyVerbose, rootCmd.PersistentFlags().Lookup(config.KeyVerbose))
 	viper.BindEnv(config.KeyVerbose, "AWSU_VERBOSE")
+
+  rootCmd.PersistentFlags().BoolP(config.KeyDocker, "d", false, "enable output for docker (wo/ export)")
+	viper.BindPFlag(config.KeyDocker, rootCmd.PersistentFlags().Lookup(config.KeyDocker))
+	viper.BindEnv(config.KeyDocker, "AWSU_DOCKER")
 
 }

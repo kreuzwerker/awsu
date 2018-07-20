@@ -86,13 +86,15 @@ func (c *Credentials) IsValid() bool {
 }
 
 // String returns a string representation of these credentials, suitable for eval()
-func (c *Credentials) String() string {
+func (c *Credentials) String(forDocker bool) string {
 
-	parts := []string{
-		fmt.Sprintf("export AWSU_EXPIRES=%s", c.Expires.Format(time.RFC3339)),
-		fmt.Sprintf("export AWS_ACCESS_KEY_ID=%s", c.AccessKeyID),
-		fmt.Sprintf("export AWS_SECRET_ACCESS_KEY=%s", c.SecretAccessKey),
-	}
+    var export string
+    if !forDocker { export = "export "} else { export = ""}
+  	parts := []string{
+  		fmt.Sprintf("%sAWSU_EXPIRES=%s", export, c.Expires.Format(time.RFC3339)),
+  		fmt.Sprintf("%sAWS_ACCESS_KEY_ID=%s", export, c.AccessKeyID),
+  		fmt.Sprintf("%sAWS_SECRET_ACCESS_KEY=%s", export, c.SecretAccessKey),
+    }
 
 	if c.SessionToken != "" {
 		parts = append(parts, fmt.Sprintf("export AWS_SESSION_TOKEN=%s", c.SessionToken))

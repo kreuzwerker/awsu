@@ -16,6 +16,7 @@ const (
 	KeySessionTTL            = "session-ttl"
 	KeySharedCredentialsFile = "shared-credentials-file"
 	KeyVerbose               = "verbose"
+  KeyDocker                = "for-docker"
 )
 
 type Config struct {
@@ -29,6 +30,8 @@ type Config struct {
 	SessionTTL            time.Duration
 	SharedCredentialsFile string
 	Verbose               bool
+  Docker                bool
+
 }
 
 func NewConfig() *Config {
@@ -43,6 +46,7 @@ func NewConfig() *Config {
 		SessionTTL:            viper.GetDuration(KeySessionTTL),
 		SharedCredentialsFile: viper.GetString(KeySharedCredentialsFile),
 		Verbose:               viper.GetBool(KeyVerbose),
+    Docker:                viper.GetBool(KeyDocker),
 	}
 
 }
