@@ -3,6 +3,7 @@ package config
 import (
 	"io/ioutil"
 
+	"github.com/pkg/errors"
 	ini "gopkg.in/ini.v1"
 )
 
@@ -24,10 +25,14 @@ func Load(files ...string) (Profiles, error) {
 
 	for _, file := range files {
 
+		if file == "" {
+			continue
+		}
+
 		buf, err := ioutil.ReadFile(file)
 
 		if err != nil {
-			continue
+			return nil, errors.Wrapf(err, "failed to open %q", file)
 		}
 
 		loaded = append(loaded, file)
