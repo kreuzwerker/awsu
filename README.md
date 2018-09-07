@@ -37,6 +37,34 @@ With an existing file in place `awsu` can be configured to use a certain profile
 * Cache TTLs and the session length for session tokens and roles can be choosen with `AWSU_CACHE_SESSION_TOKEN_TTL` (default 8h) and `AWSU_CACHE_ROLE_TTL` (default 1h) - after half of that TTL has expired the cached files are considered invalid and will be refreshed; this is done to avoid issues during long running operations
 * Logging can be enabled with `-v` or `AWSU_VERBOSE`
 
+### Table of configuration flags
+
+The following 9 global configuration flags are available for all commands. If the matching environment variable is prefixed `AWS_ ` it's defaults and semantics are identical to the AWS SDK platform standard.
+
+#### Profile and configuration files
+
+| Description                 | Long                      | Short | Environment                   | Default   |
+| --------------------------- | ------------------------- | ----- | ----------------------------- | --------- |
+| Selected profile            | `profile`                 | `p`   | `AWS_PROFILE`                 | `default` |
+| Shared config file location | `config-file`             | `c`   | `AWS_CONFIG_FILE`             | Platform  |
+| Shared credentials file     | `shared-credentials-file` | `s`   | `AWS_SHARED_CREDENTIALS_FILE` | Platform  |
+
+#### Short-term credentials
+
+| Description                        | Long         | Short | Environment      | Default                                                      |
+| ---------------------------------- | ------------ | ----- | ---------------- | ------------------------------------------------------------ |
+| Disable caching                    | `no-cache`   | `n`   | `AWSU_NO_CACHE`  | `false`                                                      |
+| Duration of session tokens & roles | `duration`   | `d`   | `AWSU_DURATION`  | 1 hour, maximum depends on config of the role in question (up to 12 hours) |
+| Grace period until caches expire   | `grace`      | `r`   | `AWSU_GRACE`     | 45 minutes                                                   |
+| Source of OTP tokens               | `generator`  | `g`   | `AWSU_GENERATOR` | `yubikey` - can be set to `manual` if you want to manually enter OTP passwords |
+| MFA serial override                | `mfa-serial` | `m`   | `AWSU_SERIAL`    | None - can be user to set or override MFA serials            |
+
+#### Other
+
+| Description     | Long      | Short | Environment    | Default |
+| --------------- | --------- | ----- | -------------- | ------- |
+| Verbose logging | `verbose` | `v`   | `AWSU_VERBOSE` | `false` |
+
 ## Running `awsu`
 
 `awsu` main mode can be run in two flavors: export and exec.

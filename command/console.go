@@ -24,13 +24,13 @@ var consoleCmd = &cobra.Command{
 	Short: "Generates link to or opens AWS console",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		creds, err := newSession(rootConfig)
+		creds, err := newSession(rootFlags)
 
 		if err != nil {
 			return err
 		}
 
-		profile := rootConfig.Profiles[rootConfig.Profile]
+		profile := rootFlags.Profiles[rootFlags.Profile]
 
 		// TODO: move the whole logic to a "console" package
 		if profile.ExternalID == "" {
@@ -114,7 +114,14 @@ var consoleCmd = &cobra.Command{
 
 func init() {
 
-	consoleCmd.Flags().BoolVarP(&consoleFlags.open, "open", "o", true, "attempts to open the generated url")
+	flag(consoleCmd.Flags(),
+		&consoleFlags.open,
+		true,
+		"open",
+		"o",
+		"",
+		"attempts to open the generated url in a browser",
+	)
 
 	rootCmd.AddCommand(consoleCmd)
 

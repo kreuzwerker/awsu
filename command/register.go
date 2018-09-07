@@ -12,6 +12,7 @@ import (
 
 var registerFlags = struct {
 	issuer string
+	qr     bool
 }{}
 
 var registerCmd = &cobra.Command{
@@ -23,7 +24,7 @@ var registerCmd = &cobra.Command{
 
 		username := args[0]
 
-		creds, err := newSession(rootConfig)
+		creds, err := newSession(rootFlags)
 
 		if err != nil {
 			return err
@@ -32,14 +33,18 @@ var registerCmd = &cobra.Command{
 		arn, err := yubikey.NewMFA(creds.UpdateSession(session.Must(session.NewSession())),
 			func(secret string) {
 
-				uri := fmt.Sprintf("otpauth://totp/%s@%s?secret=%s&issuer=%s",
-					username,
-					creds.Profile,
-					secret,
-					registerFlags.issuer,
-				)
+				if registerFlags.qr {
 
-				qr.Generate(uri, qr.L, os.Stderr)
+					uri := fmt.Sprintf("otpauth://totp/%s@%s?secret=%s&issuer=%s",
+						username,
+						creds.Profile,
+						secret,
+						registerFlags.issuer,
+					)
+
+					qr.Generate(uri, qr.L, os.Stderr)
+
+				}
 
 			},
 			username,
@@ -58,7 +63,23 @@ var registerCmd = &cobra.Command{
 
 func init() {
 
-	registerCmd.Flags().StringVarP(&registerFlags.issuer, "issuer", "i", "Amazon", "issuer parameter in the QR key uri")
+	flag(registerCmd.Flags(),
+		&registerFlags.issuer,
+		"Amazon",
+		"issuer",
+		"i",
+		"AWSU_QR_ISSUER",
+		"issuer parameter in the QR key uri",
+	)
+
+	flag(registerCmd.Flags(),
+		&registerFlags.qr,
+		true,
+		"qr",
+		"q",
+		"AWSU_QR",
+		"generate a QR barcode as backup for soft tokens",
+	)
 
 	rootCmd.AddCommand(registerCmd)
 

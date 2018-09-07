@@ -2,6 +2,11 @@
 
 All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will be documented in this file.
 
+## [2.3.0]
+
+### Added
+
+- Added environment variables and config flags for all configuration mechanisms
 ## [2.2.1]
 
 ### Added
