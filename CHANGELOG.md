@@ -7,6 +7,14 @@ All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will 
 ### Added
 
 - Added environment variables and config flags for all configuration mechanisms
+
+### Changed
+
+#### Internal
+
+- Removed cache and session ttl mechanism and replaced it with duration and grace
+- Created new client structure with explicit generators, sources and target  
+
 ## [2.2.1]
 
 ### Added
