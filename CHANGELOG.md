@@ -10,6 +10,8 @@ All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will 
 
 ### Changed
 
+- Fixed expires output bug and added expiry hints. 
+
 #### Internal
 
 - Removed cache and session ttl mechanism and replaced it with duration and grace

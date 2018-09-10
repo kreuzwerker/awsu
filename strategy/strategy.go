@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws/session"
+	human "github.com/dustin/go-humanize"
 	"github.com/kreuzwerker/awsu/config"
 	"github.com/kreuzwerker/awsu/log"
 	"github.com/kreuzwerker/awsu/strategy/credentials"
@@ -127,6 +128,10 @@ func Apply(cfg *config.Config) (*credentials.Credentials, error) {
 			sess = current.UpdateSession(sess)
 		}
 
+	}
+
+	if last.Expires.Second() > 0 {
+		log.Debug("session will expire (after applying grace) %s", human.Time(last.Expires))
 	}
 
 	return last, nil

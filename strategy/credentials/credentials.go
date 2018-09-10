@@ -87,7 +87,7 @@ func (c *Credentials) Exec(app string, args []string) error {
 
 	env := envmap.Import()
 
-	if c.Expires != (time.Time{}) {
+	if c.Expires.Second() > 0 {
 		env["AWSU_EXPIRES"] = c.Expires.Format(time.RFC3339)
 	}
 
