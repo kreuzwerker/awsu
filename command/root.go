@@ -16,7 +16,9 @@ import (
 var conf config.Config
 
 var rootCmd = &cobra.Command{
-	Use: app,
+	Use:           app,
+	SilenceErrors: true,
+	SilenceUsage:  true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
 		if err := viper.Unmarshal(&conf); err != nil {

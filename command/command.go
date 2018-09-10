@@ -3,6 +3,7 @@ package command
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/spf13/pflag"
@@ -16,13 +17,17 @@ var this = Version{}
 // Execute is the main entry point into the app
 func Execute(version, build, time string) {
 
+	whitespace := regexp.MustCompile(`(\s{2,})`)
+
 	this.Build = build
 	this.Time = time
 	this.Version = version
 
 	if _, err := rootCmd.ExecuteC(); err != nil {
 
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintf(os.Stderr, "error: %s\n",
+			whitespace.ReplaceAllString(err.Error(), ""))
+
 		os.Exit(-1)
 
 	}
