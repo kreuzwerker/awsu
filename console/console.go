@@ -48,34 +48,18 @@ func New(conf *config.Config) (*Console, error) {
 // Link returns a link to the AWS console
 func (c *Console) Link() (string, error) {
 
-	var f = c.linkInternal
+	var f = c.internal
 
 	if c.profile.ExternalID != "" {
-		f = c.linkExternal
+		f = c.external
 	}
 
 	return f()
 
 }
 
-func (c *Console) linkInternal() (string, error) {
-
-	a, err := arn.Parse(c.profile.RoleARN)
-
-	if err != nil {
-		return "", err
-	}
-
-	url := fmt.Sprintf("https://signin.aws.amazon.com/switchrole?account=%s&roleName=%s&displayName=%s",
-		a.AccountID,
-		strings.TrimPrefix(a.Resource, "role/"),
-		c.profile.Name)
-
-	return url, nil
-
-}
-
-func (c *Console) linkExternal() (string, error) {
+// external returns a console link to an external / federated session
+func (c *Console) external() (string, error) {
 
 	creds, err := strategy.Apply(c.conf)
 
@@ -127,6 +111,24 @@ func (c *Console) linkExternal() (string, error) {
 		issuer,
 		destination,
 		token)
+
+	return url, nil
+
+}
+
+// internal returns a console link to an internal / cross account session
+func (c *Console) internal() (string, error) {
+
+	a, err := arn.Parse(c.profile.RoleARN)
+
+	if err != nil {
+		return "", err
+	}
+
+	url := fmt.Sprintf("https://signin.aws.amazon.com/switchrole?account=%s&roleName=%s&displayName=%s",
+		a.AccountID,
+		strings.TrimPrefix(a.Resource, "role/"),
+		c.profile.Name)
 
 	return url, nil
 

@@ -17,7 +17,10 @@ import (
 )
 
 const (
-	GenManual  = "manual"
+	// GenManual is the "manual" (type-OTP-in) generator
+	GenManual = "manual"
+
+	// GenYubikey is the native Yubikey generator
 	GenYubikey = "yubikey"
 )
 
@@ -30,6 +33,7 @@ const (
 	logSerialFromProfile                = "using %q profile for MFA serial"
 )
 
+// SessionToken is a strategy that gets session tokens using long-term credentials
 type SessionToken struct {
 	Duration  time.Duration
 	Generator string
@@ -39,6 +43,7 @@ type SessionToken struct {
 	_serial   string
 }
 
+// Credentials aquires actual credentials
 func (s *SessionToken) Credentials(sess *session.Session) (*credentials.Credentials, error) {
 
 	var (
@@ -77,14 +82,17 @@ func (s *SessionToken) Credentials(sess *session.Session) (*credentials.Credenti
 
 }
 
+// IsCacheable indicates the output of this strategy can be cached (always true)
 func (s *SessionToken) IsCacheable() bool {
 	return true
 }
 
+// Name returns the name of this strategy
 func (s *SessionToken) Name() string {
 	return "session_token"
 }
 
+// Profile returns the name of the profile used (if applicable, otherwise nil)
 func (s *SessionToken) Profile() *config.Profile {
 
 	for _, profile := range s.Profiles {

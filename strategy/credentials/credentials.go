@@ -26,17 +26,20 @@ const (
 	logSavingCredentials  = "saving cached credentials to %q"
 )
 
+// Credentials encapsulates cacheable credentials that can convert to actual
+// session and can be used to aquire further credential
 type Credentials struct {
 	credentials.Value
 	Expires time.Time
 	Profile string
 }
 
-func NewLongTerm(profile, accessKeyId, secretAccessKey string) *Credentials {
+// NewLongTerm is a constructor for long term credentials
+func NewLongTerm(profile, accessKeyID, secretAccessKey string) *Credentials {
 
 	return &Credentials{
 		Value: credentials.Value{
-			AccessKeyID:     accessKeyId,
+			AccessKeyID:     accessKeyID,
 			SecretAccessKey: secretAccessKey,
 		},
 		Profile: profile,
@@ -44,11 +47,12 @@ func NewLongTerm(profile, accessKeyId, secretAccessKey string) *Credentials {
 
 }
 
-func NewShortTerm(profile, accessKeyId, secretAccessKey, sessionToken string, expires time.Time) *Credentials {
+// NewShortTerm is a constructor for short term credentials with expiry
+func NewShortTerm(profile, accessKeyID, secretAccessKey, sessionToken string, expires time.Time) *Credentials {
 
 	return &Credentials{
 		Value: credentials.Value{
-			AccessKeyID:     accessKeyId,
+			AccessKeyID:     accessKeyID,
 			SecretAccessKey: secretAccessKey,
 			SessionToken:    sessionToken,
 		},
@@ -115,11 +119,17 @@ func (c *Credentials) Exec(app string, args []string) error {
 
 }
 
+// IsValid indicates if a loaded credential is (still) valid
 func (c *Credentials) IsValid() bool {
 	return time.Now().Before(c.Expires)
 }
 
-// Save caches credentials
+// NewSession creates a new session with these credentials
+func (c *Credentials) NewSession() *session.Session {
+	return c.UpdateSession(session.New(&aws.Config{}))
+}
+
+// Save saves (caches) credentials
 func (c *Credentials) Save() error {
 
 	path, err := cachePath(c.Profile)
@@ -157,14 +167,7 @@ func (c *Credentials) String() string {
 
 }
 
-func (c *Credentials) NewSession() *session.Session {
-
-	sess := session.New(&aws.Config{})
-
-	return c.UpdateSession(sess)
-
-}
-
+// UpdateSession updates a given session with this credentials
 func (c *Credentials) UpdateSession(sess *session.Session) *session.Session {
 
 	sess.Config.Credentials = credentials.NewStaticCredentials(

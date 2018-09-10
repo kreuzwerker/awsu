@@ -20,12 +20,14 @@ const (
 	logAssumingRole     = "assuming role %q using profile %s (sid %s)"
 )
 
+// AssumeRole is a strategy that assumes IAM roles
 type AssumeRole struct {
 	Duration time.Duration
 	Grace    time.Duration
 	Profiles []*config.Profile
 }
 
+// Credentials aquires actual credentials
 func (a *AssumeRole) Credentials(sess *session.Session) (*credentials.Credentials, error) {
 
 	var (
@@ -64,14 +66,17 @@ func (a *AssumeRole) Credentials(sess *session.Session) (*credentials.Credential
 
 }
 
+// IsCacheable indicates the output of this strategy can be cached (always true)
 func (a *AssumeRole) IsCacheable() bool {
 	return true
 }
 
+// Name returns the name of this strategy
 func (a *AssumeRole) Name() string {
 	return "assume_role"
 }
 
+// Profile returns the name of the profile used (if applicable, otherwise nil)
 func (a *AssumeRole) Profile() *config.Profile {
 
 	for _, profile := range a.Profiles {
@@ -86,6 +91,7 @@ func (a *AssumeRole) Profile() *config.Profile {
 
 }
 
+// sessionName returns the name give to the assumed role sessions
 func (a *AssumeRole) sessionName() string {
 
 	var rid [16]byte

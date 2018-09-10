@@ -22,16 +22,17 @@ const (
 
 // Strategy identifies a way of aquiring short-term, cacheable credentials
 type Strategy interface {
+
 	// Credentials aquires actual credentials
 	Credentials(*session.Session) (*credentials.Credentials, error)
-
-	// Name returns the name of this strategy
-	Name() string
 
 	// IsCacheable indicates the output of this strategy can be cached
 	IsCacheable() bool
 
-	// Profiles returns the name of the profile used (if applicable)
+	// Name returns the name of this strategy
+	Name() string
+
+	// Profile returns the name of the profile used (if applicable, otherwise nil)
 	Profile() *config.Profile
 }
 
