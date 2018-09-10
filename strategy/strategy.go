@@ -37,7 +37,7 @@ type Strategy interface {
 func Apply(cfg *config.Config) (*credentials.Credentials, error) {
 
 	var (
-		sess   = session.Must(session.NewSession())
+		sess   *session.Session
 		source *config.Profile
 		target = cfg.Profiles[cfg.Profile]
 	)
@@ -120,7 +120,12 @@ func Apply(cfg *config.Config) (*credentials.Credentials, error) {
 		}
 
 		last = current
-		sess = current.UpdateSession(sess)
+
+		if sess == nil {
+			sess = current.NewSession()
+		} else {
+			sess = current.UpdateSession(sess)
+		}
 
 	}
 

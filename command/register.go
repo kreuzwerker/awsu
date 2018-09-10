@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/kreuzwerker/awsu/log"
 	"github.com/kreuzwerker/awsu/source/yubikey"
 	"github.com/kreuzwerker/awsu/strategy"
@@ -39,9 +38,7 @@ var registerCmd = &cobra.Command{
 			return err
 		}
 
-		sess := session.Must(session.NewSession())
-
-		target, err := mfa.New(creds.UpdateSession(sess), source)
+		target, err := mfa.New(creds.NewSession(), source)
 
 		if err != nil {
 			return err

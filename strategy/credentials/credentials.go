@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/kreuzwerker/awsu/log"
@@ -146,6 +147,14 @@ func (c *Credentials) String() string {
 	}
 
 	return strings.Join(parts, "\n")
+
+}
+
+func (c *Credentials) NewSession() *session.Session {
+
+	sess := session.New(&aws.Config{})
+
+	return c.UpdateSession(sess)
 
 }
 
