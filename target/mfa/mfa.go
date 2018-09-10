@@ -76,7 +76,7 @@ func (m *MFA) Delete(username string) error {
 		return errors.Wrapf(err, errDeleteSerialDetermination)
 	}
 
-	serial, err := callerIdentityToSerial(res.Arn)
+	serial, err := CallerIdentityToSerial(res.Arn)
 
 	if err != nil {
 		return err
@@ -130,7 +130,7 @@ func (m *MFA) deactivate(username string, serial *string) error {
 		return errors.Wrapf(err, errDeactivateVirtualDevice, *serial)
 	}
 
-	name, err := serialToName(serial)
+	name, err := SerialToName(serial)
 
 	if err != nil {
 		return err
@@ -166,7 +166,7 @@ func (m *MFA) enable(username string, serial *string, secret []byte) error {
 
 	log.Log(logAddSecretToSource, m.source.Name())
 
-	name, err := serialToName(serial)
+	name, err := SerialToName(serial)
 
 	if err != nil {
 		return err

@@ -12,8 +12,8 @@ const (
 	errParseARN = "failed to parse %q as ARN"
 )
 
-// callerIdentityToSerial a caller identity ARN to a MFA serial
-func callerIdentityToSerial(i *string) (string, error) {
+// CallerIdentityToSerial converts a caller identity ARN to a MFA serial
+func CallerIdentityToSerial(i *string) (string, error) {
 
 	a, err := arn.Parse(*i)
 
@@ -25,8 +25,8 @@ func callerIdentityToSerial(i *string) (string, error) {
 
 }
 
-// serialToName converts a MFA serial to a source name
-func serialToName(i *string) (string, error) {
+// SerialToName converts a MFA serial to a source name
+func SerialToName(i *string) (string, error) {
 
 	a, err := arn.Parse(*i)
 
