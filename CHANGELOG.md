@@ -14,6 +14,7 @@ All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will 
 
 - Removed cache and session ttl mechanism and replaced it with duration and grace
 - Created new client structure with explicit generators, sources and target  
+- Moved logic for console out of the command and into a dedicated helper
 
 ## [2.2.1]
 
