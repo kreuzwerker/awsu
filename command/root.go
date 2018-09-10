@@ -20,7 +20,7 @@ var rootCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		creds, err := newSession(rootFlags)
+		creds, err := strategy.Apply(config)
 
 		if err != nil {
 			return err

@@ -1,13 +1,12 @@
-package command
+package strategy
 
 import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/kreuzwerker/awsu/aquirer"
 	"github.com/kreuzwerker/awsu/config"
-	"github.com/kreuzwerker/awsu/generator"
 	"github.com/kreuzwerker/awsu/log"
+	"github.com/kreuzwerker/awsu/strategy/credentials"
 )
 
 const (
@@ -16,10 +15,26 @@ const (
 	errProfileCacheLoadFailed  = "failed to load cached profile %q: %s"
 	errProfileCacheSaveFailed  = "failed to save cached profile %q: %s"
 	errProfileNotFound         = "no such profile %q configured"
-	msgAquirerWithProfile      = "using aquirer %q (cache: %t) for profile %q"
+	logStrategyWithProfile     = "using strategy %q (cache: %t) for profile %q"
 )
 
-func newSession(cfg *config.Config) (*aquirer.Credentials, error) {
+// Strategy identifies a way of aquiring short-term, cacheable credentials
+type Strategy interface {
+	// Credentials aquires actual credentials
+	Credentials(*session.Session) (*credentials.Credentials, error)
+
+	// Name returns the name of this strategy
+	Name() string
+
+	// IsCacheable indicates the output of this strategy can be cached
+	IsCacheable() bool
+
+	// Profiles returns the name of the profile used (if applicable)
+	Profile() *config.Profile
+}
+
+// Apply applies all configured strategy, depending on the given Config
+func Apply(cfg *config.Config) (*credentials.Credentials, error) {
 
 	var (
 		sess   = session.Must(session.NewSession())
@@ -33,29 +48,29 @@ func newSession(cfg *config.Config) (*aquirer.Credentials, error) {
 
 	source = cfg.Profiles[target.SourceProfile]
 
-	aquirers := []aquirer.Aquirer{
-		&aquirer.LongTerm{
+	strategies := []Strategy{
+		&LongTerm{
 			Profiles: []*config.Profile{source, target},
 		},
-		&aquirer.SessionToken{
-			Duration:  cfg.SessionTTL,
-			Generator: generator.Name(cfg.Generator),
-			Grace:     cfg.SessionTTL / 2,
+		&SessionToken{
+			Duration:  cfg.Duration,
+			Generator: cfg.Generator,
+			Grace:     cfg.Grace,
 			MFASerial: cfg.MFASerial,
 			Profiles:  []*config.Profile{source, target},
 		},
-		&aquirer.AssumeRole{
-			Duration: cfg.CacheTTL,
-			Grace:    cfg.CacheTTL / 2,
+		&AssumeRole{
+			Duration: cfg.Duration,
+			Grace:    cfg.Grace,
 			Profiles: []*config.Profile{source, target},
 		},
 	}
 
-	var last *aquirer.Credentials
+	var last *credentials.Credentials
 
-	for _, a := range aquirers {
+	for _, a := range strategies {
 
-		var current *aquirer.Credentials
+		var current *credentials.Credentials
 
 		profile := a.Profile()
 
@@ -65,12 +80,12 @@ func newSession(cfg *config.Config) (*aquirer.Credentials, error) {
 
 		cache := !cfg.NoCache && a.IsCacheable()
 
-		log.Log(msgAquirerWithProfile, a.Name(), cache, profile.Name)
+		log.Log(logStrategyWithProfile, a.Name(), cache, profile.Name)
 
 		// try to load
 		if cache {
 
-			creds, err := aquirer.LoadCredentials(profile.Name)
+			creds, err := credentials.Load(profile.Name)
 
 			if err != nil {
 				log.Log(errProfileCacheLoadFailed, profile.Name, err)

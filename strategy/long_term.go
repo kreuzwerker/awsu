@@ -1,19 +1,20 @@
-package aquirer
+package strategy
 
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/kreuzwerker/awsu/config"
+	"github.com/kreuzwerker/awsu/strategy/credentials"
 )
 
 type LongTerm struct {
 	Profiles []*config.Profile
 }
 
-func (l *LongTerm) Credentials(sess *session.Session) (*Credentials, error) {
+func (l *LongTerm) Credentials(sess *session.Session) (*credentials.Credentials, error) {
 
 	p := l.Profile()
 
-	return newLongTermCredentials(p.Name,
+	return credentials.NewLongTerm(p.Name,
 			p.AccessKeyID,
 			p.SecretAccessKey),
 		nil

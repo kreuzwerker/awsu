@@ -1,4 +1,4 @@
-package aquirer
+package strategy
 
 import (
 	"fmt"
@@ -8,8 +8,17 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/kreuzwerker/awsu/config"
-	"github.com/kreuzwerker/awsu/generator"
 	"github.com/kreuzwerker/awsu/log"
+	"github.com/kreuzwerker/awsu/source"
+	"github.com/kreuzwerker/awsu/source/manual"
+	"github.com/kreuzwerker/awsu/source/yubikey"
+	"github.com/kreuzwerker/awsu/strategy/credentials"
+	"github.com/kreuzwerker/awsu/target/mfa"
+)
+
+const (
+	GenManual  = "manual"
+	GenYubikey = "yubikey"
 )
 
 const (
@@ -19,7 +28,7 @@ const (
 
 type SessionToken struct {
 	Duration      time.Duration
-	Generator     generator.Name
+	Generator     string
 	Grace         time.Duration
 	MFASerial     string // override or set explicitly
 	Profiles      []*config.Profile
@@ -33,7 +42,7 @@ func (s *SessionToken) serialNumber() string {
 	}
 
 	if s._serialNumber = s.MFASerial; s._serialNumber != "" {
-		log.Log("using explicitly supplied MFA serial")
+		log.Log("using explicitly supplied MFA serial %q", s._serialNumber)
 		return s._serialNumber
 	}
 
@@ -54,7 +63,7 @@ func (s *SessionToken) serialNumber() string {
 
 }
 
-func (s *SessionToken) Credentials(sess *session.Session) (*Credentials, error) {
+func (s *SessionToken) Credentials(sess *session.Session) (*credentials.Credentials, error) {
 
 	var (
 		client       = sts.New(sess)
@@ -64,13 +73,33 @@ func (s *SessionToken) Credentials(sess *session.Session) (*Credentials, error) 
 
 	log.Log("getting session token for profile %q and serial %q", lt.Name, serialNumber)
 
-	generator, ok := generator.Generators[s.Generator]
+	var g source.Generator
 
-	if !ok {
-		return nil, fmt.Errorf("unknown generator %q", s.Generator)
+	switch s.Generator {
+	case GenYubikey:
+
+		gen, err := yubikey.New()
+
+		if err != nil {
+			return nil, err
+		}
+
+		g = gen
+
+	case GenManual:
+		g = manual.New()
+
+	default:
+		fmt.Errorf("unknown generator %q", s.Generator)
 	}
 
-	token, err := generator(serialNumber)
+	name, err := mfa.SerialToName(&serialNumber)
+
+	if err != nil {
+		return nil, err
+	}
+
+	token, err := g.Generate(time.Now(), name)
 
 	if err != nil {
 		return nil, err
@@ -86,7 +115,7 @@ func (s *SessionToken) Credentials(sess *session.Session) (*Credentials, error) 
 		return nil, err
 	}
 
-	creds := newShortTermCredentials(
+	creds := credentials.NewShortTerm(
 		lt.Name,
 		*res.Credentials.AccessKeyId,
 		*res.Credentials.SecretAccessKey,

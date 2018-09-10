@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/arn"
+	"github.com/kreuzwerker/awsu/strategy"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
 )
@@ -24,7 +25,7 @@ var consoleCmd = &cobra.Command{
 	Short: "Generates link to or opens AWS console",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		creds, err := newSession(rootFlags)
+		creds, err := strategy.Apply(rootFlags)
 
 		if err != nil {
 			return err

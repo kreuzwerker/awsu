@@ -1,11 +1,15 @@
 package command
 
 import (
+	"encoding/base32"
 	"fmt"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/kreuzwerker/awsu/generator/yubikey"
+	"github.com/kreuzwerker/awsu/log"
+	"github.com/kreuzwerker/awsu/source/yubikey"
+	"github.com/kreuzwerker/awsu/strategy"
+	"github.com/kreuzwerker/awsu/target/mfa"
 	qr "github.com/mdp/qrterminal"
 	"github.com/spf13/cobra"
 )
@@ -24,37 +28,47 @@ var registerCmd = &cobra.Command{
 
 		username := args[0]
 
-		creds, err := newSession(rootFlags)
+		creds, err := strategy.Apply(config)
 
 		if err != nil {
 			return err
 		}
 
-		arn, err := yubikey.NewMFA(creds.UpdateSession(session.Must(session.NewSession())),
-			func(secret string) {
-
-				if registerFlags.qr {
-
-					uri := fmt.Sprintf("otpauth://totp/%s@%s?secret=%s&issuer=%s",
-						username,
-						creds.Profile,
-						secret,
-						registerFlags.issuer,
-					)
-
-					qr.Generate(uri, qr.L, os.Stderr)
-
-				}
-
-			},
-			username,
-		)
+		source, err := yubikey.New()
 
 		if err != nil {
 			return err
 		}
 
-		fmt.Println(*arn)
+		sess := session.Must(session.NewSession())
+
+		target, err := mfa.New(creds.UpdateSession(sess), source)
+
+		if err != nil {
+			return err
+		}
+
+		serial, secret, err := target.Add(username)
+
+		if err != nil {
+			log.Info("failed to register %q, attemping to delete from target", username)
+			return target.Delete(username)
+		}
+
+		if registerFlags.qr {
+
+			uri := fmt.Sprintf("otpauth://totp/%s@%s?secret=%s&issuer=%s",
+				username,
+				creds.Profile,
+				base32.StdEncoding.EncodeToString(secret),
+				registerFlags.issuer,
+			)
+
+			qr.Generate(uri, qr.L, os.Stderr)
+
+		}
+
+		log.Info("MFA %q serial successfully registered", *serial)
 
 		return nil
 

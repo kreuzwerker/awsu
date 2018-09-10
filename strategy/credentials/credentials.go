@@ -1,4 +1,4 @@
-package aquirer
+package credentials
 
 import (
 	"encoding/json"
@@ -24,8 +24,34 @@ type Credentials struct {
 	Profile string
 }
 
-// LoadCredentials loads cached credentials
-func LoadCredentials(profile string) (*Credentials, error) {
+func NewLongTerm(profile, accessKeyId, secretAccessKey string) *Credentials {
+
+	return &Credentials{
+		Value: credentials.Value{
+			AccessKeyID:     accessKeyId,
+			SecretAccessKey: secretAccessKey,
+		},
+		Profile: profile,
+	}
+
+}
+
+func NewShortTerm(profile, accessKeyId, secretAccessKey, sessionToken string, expires time.Time) *Credentials {
+
+	return &Credentials{
+		Value: credentials.Value{
+			AccessKeyID:     accessKeyId,
+			SecretAccessKey: secretAccessKey,
+			SessionToken:    sessionToken,
+		},
+		Expires: expires,
+		Profile: profile,
+	}
+
+}
+
+// Load loads cached credentials
+func Load(profile string) (*Credentials, error) {
 
 	path, err := cachePath(profile)
 
@@ -85,6 +111,27 @@ func (c *Credentials) IsValid() bool {
 	return time.Now().Before(c.Expires)
 }
 
+// Save caches credentials
+func (c *Credentials) Save() error {
+
+	path, err := cachePath(c.Profile)
+
+	if err != nil {
+		return err
+	}
+
+	log.Log("saving session to %q", path)
+
+	out, err := json.Marshal(c)
+
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(path, out, 0600)
+
+}
+
 // String returns a string representation of these credentials, suitable for eval()
 func (c *Credentials) String() string {
 
@@ -114,27 +161,6 @@ func (c *Credentials) UpdateSession(sess *session.Session) *session.Session {
 
 }
 
-// Save caches credentials
-func (c *Credentials) Save() error {
-
-	path, err := cachePath(c.Profile)
-
-	if err != nil {
-		return err
-	}
-
-	log.Log("saving session to %q", path)
-
-	out, err := json.Marshal(c)
-
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(path, out, 0600)
-
-}
-
 // cachePath determines the cache path for the given credentials
 func cachePath(profile string) (string, error) {
 
@@ -151,31 +177,5 @@ func cachePath(profile string) (string, error) {
 	}
 
 	return filepath.Join(dir, fmt.Sprintf("%s.json", profile)), nil
-
-}
-
-func newLongTermCredentials(profile, accessKeyId, secretAccessKey string) *Credentials {
-
-	return &Credentials{
-		Value: credentials.Value{
-			AccessKeyID:     accessKeyId,
-			SecretAccessKey: secretAccessKey,
-		},
-		Profile: profile,
-	}
-
-}
-
-func newShortTermCredentials(profile, accessKeyId, secretAccessKey, sessionToken string, expires time.Time) *Credentials {
-
-	return &Credentials{
-		Value: credentials.Value{
-			AccessKeyID:     accessKeyId,
-			SecretAccessKey: secretAccessKey,
-			SessionToken:    sessionToken,
-		},
-		Expires: expires,
-		Profile: profile,
-	}
 
 }

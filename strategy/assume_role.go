@@ -1,4 +1,4 @@
-package aquirer
+package strategy
 
 import (
 	"crypto/rand"
@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/kreuzwerker/awsu/config"
 	"github.com/kreuzwerker/awsu/log"
+	"github.com/kreuzwerker/awsu/strategy/credentials"
 )
 
 const (
@@ -23,7 +24,7 @@ type AssumeRole struct {
 	Profiles []*config.Profile
 }
 
-func (a *AssumeRole) Credentials(sess *session.Session) (*Credentials, error) {
+func (a *AssumeRole) Credentials(sess *session.Session) (*credentials.Credentials, error) {
 
 	var (
 		client  = sts.New(sess)
@@ -49,7 +50,7 @@ func (a *AssumeRole) Credentials(sess *session.Session) (*Credentials, error) {
 		return nil, fmt.Errorf(errAssumeRoleFailed, profile.RoleARN, err)
 	}
 
-	creds := newShortTermCredentials(
+	creds := credentials.NewShortTerm(
 		profile.Name,
 		*res.Credentials.AccessKeyId,
 		*res.Credentials.SecretAccessKey,
