@@ -47,8 +47,7 @@ var registerCmd = &cobra.Command{
 		serial, secret, err := target.Add(username)
 
 		if err != nil {
-			log.Info("failed to register %q, attemping to delete from target", username)
-			return target.Delete(username)
+			return err
 		}
 
 		if conf.Register.QR {
