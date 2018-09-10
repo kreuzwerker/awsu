@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestInitLoad(t *testing.T) {
+func TestConfigInitLoad(t *testing.T) {
 
 	var (
 		assert  = assert.New(t)
@@ -60,7 +60,7 @@ func TestInitLoad(t *testing.T) {
 
 }
 
-func TestInitValidate(t *testing.T) {
+func TestConfigInitValidate(t *testing.T) {
 
 	var assert = assert.New(t)
 

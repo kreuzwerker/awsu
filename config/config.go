@@ -9,16 +9,18 @@ import (
 
 // Config is the central configuration struct of awsu
 type Config struct {
-	Duration              time.Duration
-	Grace                 time.Duration
-	ConfigFile            string
-	Generator             string
-	MFASerial             string
-	NoCache               bool
-	Profile               string
-	Profiles              Profiles
-	SharedCredentialsFile string
-	Verbose               bool
+	ConfigFile            string        `mapstructure:"config-file"`
+	Console               *Console      `mapstructure:"-"`
+	Duration              time.Duration `mapstructure:"duration"`
+	Generator             string        `mapstructure:"generator"`
+	Grace                 time.Duration `mapstructure:"grace"`
+	MFASerial             string        `mapstructure:"mfa-serial"`
+	NoCache               bool          `mapstructure:"no-cache"`
+	Profile               string        `mapstructure:"profile"`
+	Profiles              Profiles      `mapstructure:"-"`
+	Register              *Register     `mapstructure:"-"`
+	SharedCredentialsFile string        `mapstructure:"shared-credentials-file"`
+	Verbose               bool          `mapstructure:"verbose"`
 }
 
 // Init will perform post config initializations and validations

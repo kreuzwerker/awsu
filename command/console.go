@@ -13,25 +13,25 @@ import (
 	"github.com/kreuzwerker/awsu/strategy"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
-
-var consoleFlags = struct {
-	open bool
-}{}
 
 var consoleCmd = &cobra.Command{
 
 	Use:   "console",
 	Short: "Generates link to or opens AWS console",
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return viper.Unmarshal(&conf.Console)
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		creds, err := strategy.Apply(rootFlags)
+		creds, err := strategy.Apply(&conf)
 
 		if err != nil {
 			return err
 		}
 
-		profile := rootFlags.Profiles[rootFlags.Profile]
+		profile := conf.Profiles[conf.Profile]
 
 		// TODO: move the whole logic to a "console" package
 		if profile.ExternalID == "" {
@@ -47,7 +47,7 @@ var consoleCmd = &cobra.Command{
 				strings.TrimPrefix(a.Resource, "role/"),
 				profile.Name)
 
-			if consoleFlags.open {
+			if conf.Console.Open {
 				return open.Run(url)
 			}
 
@@ -100,7 +100,7 @@ var consoleCmd = &cobra.Command{
 				destination,
 				token)
 
-			if consoleFlags.open {
+			if conf.Console.Open {
 				return open.Run(url)
 			}
 
@@ -116,7 +116,6 @@ var consoleCmd = &cobra.Command{
 func init() {
 
 	flag(consoleCmd.Flags(),
-		&consoleFlags.open,
 		true,
 		"open",
 		"o",

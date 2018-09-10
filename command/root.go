@@ -7,20 +7,28 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/defaults"
 	"github.com/kreuzwerker/awsu/config"
+	"github.com/kreuzwerker/awsu/strategy"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/yawn/doubledash"
 )
 
-var rootFlags = new(config.Config)
+var conf config.Config
 
 var rootCmd = &cobra.Command{
 	Use: app,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		return rootFlags.Init()
+
+		if err := viper.Unmarshal(&conf); err != nil {
+			return err
+		}
+
+		return conf.Init()
+
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		creds, err := strategy.Apply(config)
+		creds, err := strategy.Apply(&conf)
 
 		if err != nil {
 			return err
@@ -42,16 +50,14 @@ func init() {
 	os.Args = doubledash.Args
 
 	flag(rootCmd.PersistentFlags(),
-		&rootFlags.ConfigFile,
 		defaults.SharedCredentialsFilename(),
-		"config-config",
+		"config-file",
 		"c",
 		"AWS_CONFIG_FILE",
 		"sets the config file",
 	)
 
 	flag(rootCmd.PersistentFlags(),
-		&rootFlags.Duration,
 		1*time.Hour,
 		"duration",
 		"d",
@@ -60,7 +66,6 @@ func init() {
 	)
 
 	flag(rootCmd.PersistentFlags(),
-		&rootFlags.ConfigFile,
 		"",
 		"mfa-serial",
 		"m",
@@ -69,7 +74,6 @@ func init() {
 	)
 
 	flag(rootCmd.PersistentFlags(),
-		&rootFlags.Generator,
 		"yubikey",
 		"generator",
 		"g",
@@ -78,7 +82,6 @@ func init() {
 	)
 
 	flag(rootCmd.PersistentFlags(),
-		&rootFlags.Grace,
 		45*time.Minute,
 		"grace",
 		"r",
@@ -87,7 +90,6 @@ func init() {
 	)
 
 	flag(rootCmd.PersistentFlags(),
-		&rootFlags.NoCache,
 		false,
 		"no-cache",
 		"n",
@@ -96,7 +98,6 @@ func init() {
 	)
 
 	flag(rootCmd.PersistentFlags(),
-		&rootFlags.Profile,
 		"default",
 		"profile",
 		"p",
@@ -105,7 +106,6 @@ func init() {
 	)
 
 	flag(rootCmd.PersistentFlags(),
-		&rootFlags.SharedCredentialsFile,
 		defaults.SharedCredentialsFilename(),
 		"shared-credentials-file",
 		"s",
@@ -114,7 +114,6 @@ func init() {
 	)
 
 	flag(rootCmd.PersistentFlags(),
-		&rootFlags.Verbose,
 		false,
 		"verbose",
 		"v",

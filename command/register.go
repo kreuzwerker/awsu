@@ -12,23 +12,22 @@ import (
 	"github.com/kreuzwerker/awsu/target/mfa"
 	qr "github.com/mdp/qrterminal"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
-
-var registerFlags = struct {
-	issuer string
-	qr     bool
-}{}
 
 var registerCmd = &cobra.Command{
 
 	Use:   "register :username",
 	Short: "Initializes an device on AWS and Yubikey",
 	Args:  cobra.ExactArgs(1),
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return viper.Unmarshal(&conf.Register)
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		username := args[0]
 
-		creds, err := strategy.Apply(config)
+		creds, err := strategy.Apply(&conf)
 
 		if err != nil {
 			return err
@@ -55,13 +54,13 @@ var registerCmd = &cobra.Command{
 			return target.Delete(username)
 		}
 
-		if registerFlags.qr {
+		if conf.Register.QR {
 
 			uri := fmt.Sprintf("otpauth://totp/%s@%s?secret=%s&issuer=%s",
 				username,
 				creds.Profile,
 				base32.StdEncoding.EncodeToString(secret),
-				registerFlags.issuer,
+				conf.Register.Issuer,
 			)
 
 			qr.Generate(uri, qr.L, os.Stderr)
@@ -78,7 +77,6 @@ var registerCmd = &cobra.Command{
 func init() {
 
 	flag(registerCmd.Flags(),
-		&registerFlags.issuer,
 		"Amazon",
 		"issuer",
 		"i",
@@ -87,7 +85,6 @@ func init() {
 	)
 
 	flag(registerCmd.Flags(),
-		&registerFlags.qr,
 		true,
 		"qr",
 		"q",

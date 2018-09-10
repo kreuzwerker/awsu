@@ -29,20 +29,20 @@ func Execute(version, build, time string) {
 
 }
 
-// flag adds a flag with pointer value, default value, long and short flags,
-// matching environment variable and matching description
-func flag(fs *pflag.FlagSet, val, def interface{}, long, short, env, desc string) {
+// flag adds a with default value, long and short flags a matching environment
+// (if not empty) and matching description
+func flag(fs *pflag.FlagSet, def interface{}, long, short, env, desc string) {
 
-	switch t := val.(type) {
+	switch t := def.(type) {
 
-	case *bool:
-		fs.BoolVarP(t, long, short, def.(bool), desc)
-	case *time.Duration:
-		fs.DurationVarP(t, long, short, def.(time.Duration), desc)
-	case *string:
-		fs.StringVarP(t, long, short, def.(string), desc)
+	case bool:
+		fs.BoolP(long, short, t, desc)
+	case time.Duration:
+		fs.DurationP(long, short, t, desc)
+	case string:
+		fs.StringP(long, short, t, desc)
 	default:
-		panic("unexpected value")
+		panic("unexpected default value")
 	}
 
 	viper.BindPFlag(long, fs.Lookup(long))
@@ -50,5 +50,7 @@ func flag(fs *pflag.FlagSet, val, def interface{}, long, short, env, desc string
 	if env != "" {
 		viper.BindEnv(long, env)
 	}
+
+	viper.SetDefault(long, fs.Lookup(long).DefValue)
 
 }
