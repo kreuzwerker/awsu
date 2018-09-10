@@ -19,6 +19,10 @@ All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will 
 - Created new client structure with explicit generators, sources and target  
 - Moved logic for console out of the command and into a dedicated helper
 
+### Removed
+
+- Removed "list" command
+
 ## [2.2.1]
 
 ### Added
