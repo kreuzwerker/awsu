@@ -27,79 +27,25 @@ const (
 )
 
 type SessionToken struct {
-	Duration      time.Duration
-	Generator     string
-	Grace         time.Duration
-	MFASerial     string // override or set explicitly
-	Profiles      []*config.Profile
-	_serialNumber string
-}
-
-func (s *SessionToken) serialNumber() string {
-
-	if s._serialNumber != "" {
-		return s._serialNumber
-	}
-
-	if s._serialNumber = s.MFASerial; s._serialNumber != "" {
-		log.Debug("using explicitly supplied MFA serial %q", s._serialNumber)
-		return s._serialNumber
-	}
-
-	// find the MFA
-	for _, profile := range s.Profiles {
-
-		if profile != nil && profile.MFASerial != "" {
-			s._serialNumber = profile.MFASerial
-			log.Debug("using %q profile for MFA serial", profile.Name)
-			return s._serialNumber
-		}
-
-	}
-
-	// TODO: try autodetection as a last resort OR just don't get a session token?
-
-	return s._serialNumber
-
+	Duration  time.Duration
+	Generator string
+	Grace     time.Duration
+	MFASerial string
+	Profiles  []*config.Profile
+	_serial   string
 }
 
 func (s *SessionToken) Credentials(sess *session.Session) (*credentials.Credentials, error) {
 
 	var (
-		client       = sts.New(sess)
-		lt           = s.Profile()
-		serialNumber = s.serialNumber()
+		client = sts.New(sess)
+		lt     = s.Profile()
+		serial = s.serial()
 	)
 
-	log.Debug("getting session token for profile %q and serial %q", lt.Name, serialNumber)
+	log.Debug("getting session token for profile %q and serial %q", lt.Name, serial)
 
-	var g source.Generator
-
-	switch s.Generator {
-	case GenYubikey:
-
-		gen, err := yubikey.New()
-
-		if err != nil {
-			return nil, err
-		}
-
-		g = gen
-
-	case GenManual:
-		g = manual.New()
-
-	default:
-		fmt.Errorf("unknown generator %q", s.Generator)
-	}
-
-	name, err := mfa.SerialToName(&serialNumber)
-
-	if err != nil {
-		return nil, err
-	}
-
-	token, err := g.Generate(time.Now(), name)
+	token, err := s.generate(&serial)
 
 	if err != nil {
 		return nil, err
@@ -107,7 +53,7 @@ func (s *SessionToken) Credentials(sess *session.Session) (*credentials.Credenti
 
 	res, err := client.GetSessionToken(&sts.GetSessionTokenInput{
 		DurationSeconds: aws.Int64(int64(s.Duration.Seconds())),
-		SerialNumber:    &serialNumber,
+		SerialNumber:    &serial,
 		TokenCode:       &token,
 	})
 
@@ -139,12 +85,72 @@ func (s *SessionToken) Profile() *config.Profile {
 
 	for _, profile := range s.Profiles {
 
-		if profile != nil && profile.IsLongTerm() && s.serialNumber() != "" {
+		if profile != nil && profile.IsLongTerm() && s.serial() != "" {
 			return profile
 		}
 
 	}
 
 	return nil
+
+}
+
+func (s *SessionToken) generate(serial *string) (string, error) {
+
+	var g source.Generator
+
+	switch s.Generator {
+	case GenYubikey:
+
+		gen, err := yubikey.New()
+
+		if err != nil {
+			return "", err
+		}
+
+		g = gen
+
+	case GenManual:
+		g = manual.New()
+
+	default:
+		fmt.Errorf("unknown generator %q", s.Generator)
+	}
+
+	name, err := mfa.SerialToName(serial)
+
+	if err != nil {
+		return "", err
+	}
+
+	return g.Generate(time.Now(), name)
+
+}
+
+func (s *SessionToken) serial() string {
+
+	if s._serial != "" {
+		return s._serial
+	}
+
+	if s._serial = s.MFASerial; s._serial != "" {
+		log.Debug("using explicitly supplied MFA serial %q", s._serial)
+		return s._serial
+	}
+
+	// find the MFA
+	for _, profile := range s.Profiles {
+
+		if profile != nil && profile.MFASerial != "" {
+			s._serial = profile.MFASerial
+			log.Debug("using %q profile for MFA serial", profile.Name)
+			return s._serial
+		}
+
+	}
+
+	// TODO: try autodetection as a last resort OR just don't get a session token?
+
+	return s._serial
 
 }
