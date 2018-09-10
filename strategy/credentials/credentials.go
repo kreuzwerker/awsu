@@ -59,7 +59,7 @@ func Load(profile string) (*Credentials, error) {
 		return nil, err
 	}
 
-	log.Log("loading cached credentials from %q", path)
+	log.Debug("loading cached credentials from %q", path)
 
 	raw, err := ioutil.ReadFile(path)
 
@@ -101,7 +101,7 @@ func (c *Credentials) Exec(app string, args []string) error {
 		return err
 	}
 
-	log.Log("running %q with args %q", cmd, args)
+	log.Debug("running %q with args %q", cmd, args)
 
 	return syscall.Exec(cmd, args, env.ToEnv())
 
@@ -120,7 +120,7 @@ func (c *Credentials) Save() error {
 		return err
 	}
 
-	log.Log("saving session to %q", path)
+	log.Debug("saving session to %q", path)
 
 	out, err := json.Marshal(c)
 

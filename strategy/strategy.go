@@ -80,7 +80,7 @@ func Apply(cfg *config.Config) (*credentials.Credentials, error) {
 
 		cache := !cfg.NoCache && a.IsCacheable()
 
-		log.Log(logStrategyWithProfile, a.Name(), cache, profile.Name)
+		log.Debug(logStrategyWithProfile, a.Name(), cache, profile.Name)
 
 		// try to load
 		if cache {
@@ -88,9 +88,9 @@ func Apply(cfg *config.Config) (*credentials.Credentials, error) {
 			creds, err := credentials.Load(profile.Name)
 
 			if err != nil {
-				log.Log(errProfileCacheLoadFailed, profile.Name, err)
+				log.Debug(errProfileCacheLoadFailed, profile.Name, err)
 			} else if !creds.IsValid() {
-				log.Log(errProfileCacheLoadExpired, profile.Name)
+				log.Debug(errProfileCacheLoadExpired, profile.Name)
 			} else {
 				current = creds
 			}

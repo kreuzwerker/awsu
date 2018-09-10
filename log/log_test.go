@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLog(t *testing.T) {
+func TestDebug(t *testing.T) {
 
 	assert := assert.New(t)
 
@@ -17,17 +17,42 @@ func TestLog(t *testing.T) {
 
 	defer func() {
 		logger.SetOutput(os.Stderr)
-		Debug = false
+		Verbose = false
 	}()
 
-	Log("hello")
+	Debug("hello")
 
 	assert.Empty(buf.String())
 
-	Debug = true
+	Verbose = true
 
-	Log("goodbye")
+	Debug("goodbye")
 
 	assert.Regexp(`\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} \[DEBUG\] goodbye\n`, buf.String())
+
+}
+
+func TestInfo(t *testing.T) {
+
+	assert := assert.New(t)
+
+	buf := bytes.NewBuffer(nil)
+	logger.SetOutput(buf)
+
+	defer func() {
+		logger.SetOutput(os.Stderr)
+		Verbose = false
+	}()
+
+	Info("hello")
+
+	assert.Regexp(`\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} hello\n`, buf.String())
+	buf.Reset()
+
+	Verbose = true
+
+	Info("goodbye")
+
+	assert.Regexp(`\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} goodbye\n`, buf.String())
 
 }

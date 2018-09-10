@@ -6,16 +6,21 @@ import (
 	"os"
 )
 
-// Debug enabled debug logging
-var Debug = false
+// Verbose enabled debug logging
+var Verbose = false
 
 var logger = log.New(os.Stderr, "", log.LstdFlags)
 
-// Log produces log messages if the Debug flag is set to true
-func Log(msg string, args ...interface{}) {
+// Debug produces log messages if the Verbose flag is set to true
+func Debug(msg string, args ...interface{}) {
 
-	if Debug {
+	if Verbose {
 		logger.Printf("[DEBUG] %s", fmt.Sprintf(msg, args...))
 	}
 
+}
+
+// Info produces log messages
+func Info(msg string, args ...interface{}) {
+	logger.Printf(msg, args...)
 }

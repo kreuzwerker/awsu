@@ -96,7 +96,7 @@ func (m *MFA) Delete(username string) error {
 // create creates the virtual MFA device
 func (m *MFA) create(username string) (*string, []byte, error) {
 
-	log.Log(logCreateVirtualDevice)
+	log.Debug(logCreateVirtualDevice)
 
 	res, err := m.iam.CreateVirtualMFADevice(&iam.CreateVirtualMFADeviceInput{
 		VirtualMFADeviceName: &username,
@@ -119,7 +119,7 @@ func (m *MFA) create(username string) (*string, []byte, error) {
 // deactivate deactivates the virtual MFA device and removes it from the source
 func (m *MFA) deactivate(username string, serial *string) error {
 
-	log.Log(logDeactivateVirtualDevice, *serial)
+	log.Debug(logDeactivateVirtualDevice, *serial)
 
 	_, err := m.iam.DeactivateMFADevice(&iam.DeactivateMFADeviceInput{
 		SerialNumber: serial,
@@ -147,7 +147,7 @@ func (m *MFA) deactivate(username string, serial *string) error {
 // delete deletes the virtual MFA device
 func (m *MFA) delete(serial *string) error {
 
-	log.Log(logDeleteVirtualDevice, *serial)
+	log.Debug(logDeleteVirtualDevice, *serial)
 
 	_, err := m.iam.DeleteVirtualMFADevice(&iam.DeleteVirtualMFADeviceInput{
 		SerialNumber: serial,
@@ -164,7 +164,7 @@ func (m *MFA) delete(serial *string) error {
 // enable enables the virtual MFA device and adds it from the source
 func (m *MFA) enable(username string, serial *string, secret []byte) error {
 
-	log.Log(logAddSecretToSource, m.source.Name())
+	log.Debug(logAddSecretToSource, m.source.Name())
 
 	name, err := SerialToName(serial)
 
@@ -188,7 +188,7 @@ func (m *MFA) enable(username string, serial *string, secret []byte) error {
 		return errors.Wrapf(err, errCalculateSecondOTP)
 	}
 
-	log.Log(logEnableVirtualDevice, otp1, otp2)
+	log.Debug(logEnableVirtualDevice, otp1, otp2)
 
 	if _, err := m.iam.EnableMFADevice(&iam.EnableMFADeviceInput{
 		AuthenticationCode1: &otp1,

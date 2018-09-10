@@ -42,7 +42,7 @@ func (s *SessionToken) serialNumber() string {
 	}
 
 	if s._serialNumber = s.MFASerial; s._serialNumber != "" {
-		log.Log("using explicitly supplied MFA serial %q", s._serialNumber)
+		log.Debug("using explicitly supplied MFA serial %q", s._serialNumber)
 		return s._serialNumber
 	}
 
@@ -51,7 +51,7 @@ func (s *SessionToken) serialNumber() string {
 
 		if profile != nil && profile.MFASerial != "" {
 			s._serialNumber = profile.MFASerial
-			log.Log("using %q profile for MFA serial", profile.Name)
+			log.Debug("using %q profile for MFA serial", profile.Name)
 			return s._serialNumber
 		}
 
@@ -71,7 +71,7 @@ func (s *SessionToken) Credentials(sess *session.Session) (*credentials.Credenti
 		serialNumber = s.serialNumber()
 	)
 
-	log.Log("getting session token for profile %q and serial %q", lt.Name, serialNumber)
+	log.Debug("getting session token for profile %q and serial %q", lt.Name, serialNumber)
 
 	var g source.Generator
 

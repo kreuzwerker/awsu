@@ -25,7 +25,7 @@ type Config struct {
 func (c *Config) Init() error {
 
 	if c.Verbose {
-		log.Debug = true
+		log.Verbose = true
 	}
 
 	profiles, err := Load(

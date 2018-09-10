@@ -32,7 +32,7 @@ func (a *AssumeRole) Credentials(sess *session.Session) (*credentials.Credential
 		sid     = a.sessionName()
 	)
 
-	log.Log("assuming role %q using profile %s (sid %s)", profile.RoleARN, profile.Name, sid)
+	log.Debug("assuming role %q using profile %s (sid %s)", profile.RoleARN, profile.Name, sid)
 
 	req := &sts.AssumeRoleInput{
 		DurationSeconds: aws.Int64(int64(a.Duration.Seconds())),
