@@ -33,3 +33,8 @@ func (m *Manual) Generate(clock time.Time, name string) (string, error) {
 	return scanner.Text(), nil
 
 }
+
+// Name returns the name of this generator
+func (m *Manual) Name() string {
+	return "manual"
+}
