@@ -22,8 +22,12 @@ const (
 )
 
 const (
-	errSessionTokenWithoutMFA           = "failed to get session token on unsuitable profiles: at least one MFA must be configured"
 	errSessionTokenOnUnsuitableProfiles = "failed to get session token on unsuitable profiles: at least one long-term keypair must be configured"
+	errSessionTokenWithoutMFA           = "failed to get session token on unsuitable profiles: at least one MFA must be configured"
+	errUnknownGenerator                 = "unknown generator %q"
+	logGettingSessionToken              = "getting session token for profile %q and serial %q"
+	logSerialExplicit                   = "using explicitly supplied MFA serial %q"
+	logSerialFromProfile                = "using %q profile for MFA serial"
 )
 
 type SessionToken struct {
@@ -43,7 +47,7 @@ func (s *SessionToken) Credentials(sess *session.Session) (*credentials.Credenti
 		serial = s.serial()
 	)
 
-	log.Debug("getting session token for profile %q and serial %q", lt.Name, serial)
+	log.Debug(logGettingSessionToken, lt.Name, serial)
 
 	token, err := s.generate(&serial)
 
@@ -114,7 +118,7 @@ func (s *SessionToken) generate(serial *string) (string, error) {
 		g = manual.New()
 
 	default:
-		fmt.Errorf("unknown generator %q", s.Generator)
+		return "", fmt.Errorf(errUnknownGenerator, s.Generator)
 	}
 
 	name, err := mfa.SerialToName(serial)
@@ -134,7 +138,7 @@ func (s *SessionToken) serial() string {
 	}
 
 	if s._serial = s.MFASerial; s._serial != "" {
-		log.Debug("using explicitly supplied MFA serial %q", s._serial)
+		log.Debug(logSerialExplicit, s._serial)
 		return s._serial
 	}
 
@@ -143,7 +147,7 @@ func (s *SessionToken) serial() string {
 
 		if profile != nil && profile.MFASerial != "" {
 			s._serial = profile.MFASerial
-			log.Debug("using %q profile for MFA serial", profile.Name)
+			log.Debug(logSerialFromProfile, profile.Name)
 			return s._serial
 		}
 

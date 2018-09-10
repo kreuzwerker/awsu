@@ -14,10 +14,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	logSuccess = "MFA %q serial successfully registered"
+)
+
 var registerCmd = &cobra.Command{
 
 	Use:   "register :username",
-	Short: "Initializes an device on AWS and Yubikey",
+	Short: "Initializes a device on AWS and Yubikey",
 	Args:  cobra.ExactArgs(1),
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return viper.Unmarshal(&conf.Register)
@@ -63,7 +67,7 @@ var registerCmd = &cobra.Command{
 
 		}
 
-		log.Info("MFA %q serial successfully registered", *serial)
+		log.Info(logSuccess, *serial)
 
 		return nil
 

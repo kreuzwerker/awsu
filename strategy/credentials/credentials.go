@@ -19,6 +19,13 @@ import (
 	"github.com/yawn/envmap"
 )
 
+const (
+	errInvalidCredentials = "cached credentials are invalid"
+	logExec               = "running %q with args %q"
+	logLoadingCredentials = "loading cached credentials from %q"
+	logSavingCredentials  = "saving cached credentials to %q"
+)
+
 type Credentials struct {
 	credentials.Value
 	Expires time.Time
@@ -60,7 +67,7 @@ func Load(profile string) (*Credentials, error) {
 		return nil, err
 	}
 
-	log.Debug("loading cached credentials from %q", path)
+	log.Debug(logLoadingCredentials, path)
 
 	raw, err := ioutil.ReadFile(path)
 
@@ -75,7 +82,7 @@ func Load(profile string) (*Credentials, error) {
 	}
 
 	if !creds.IsValid() {
-		return nil, fmt.Errorf("existing credentials are invalid")
+		return nil, fmt.Errorf(errInvalidCredentials)
 	}
 
 	return creds, nil
@@ -102,7 +109,7 @@ func (c *Credentials) Exec(app string, args []string) error {
 		return err
 	}
 
-	log.Debug("running %q with args %q", cmd, args)
+	log.Debug(logExec, cmd, args)
 
 	return syscall.Exec(cmd, args, env.ToEnv())
 
@@ -121,7 +128,7 @@ func (c *Credentials) Save() error {
 		return err
 	}
 
-	log.Debug("saving session to %q", path)
+	log.Debug(logSavingCredentials, path)
 
 	out, err := json.Marshal(c)
 

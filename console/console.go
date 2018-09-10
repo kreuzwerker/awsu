@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/arn"
 	"github.com/kreuzwerker/awsu/config"
 	"github.com/kreuzwerker/awsu/strategy"
+	"github.com/pkg/errors"
 )
 
 // Console is a helper for opening links to the AWS console
@@ -20,13 +21,21 @@ type Console struct {
 	profile *config.Profile
 }
 
+const (
+	errFederationMarshal   = "failed to marshal federation session"
+	errFederationRequest   = "failed to request federation"
+	errFederationResponse  = "failed to receive federation response body"
+	errFederationUnmarshal = "failed to unmarshal sign-in token"
+	errNoSuchProfile       = "no such profile %q configured"
+)
+
 // New instantiates a new console helper
 func New(conf *config.Config) (*Console, error) {
 
 	profile, ok := conf.Profiles[conf.Profile]
 
 	if !ok {
-		return nil, fmt.Errorf("no such profile %q configured", conf.Profile)
+		return nil, fmt.Errorf(errNoSuchProfile, conf.Profile)
 	}
 
 	return &Console{
@@ -83,7 +92,7 @@ func (c *Console) linkExternal() (string, error) {
 	enc, err := json.Marshal(fep)
 
 	if err != nil {
-		return "", fmt.Errorf("error while marshaling federation session: %s", err)
+		return "", errors.Wrapf(err, errFederationMarshal)
 	}
 
 	url := fmt.Sprintf("https://signin.aws.amazon.com/federation?Action=getSigninToken&Session=%s", string(url.QueryEscape(string(enc))))
@@ -93,19 +102,19 @@ func (c *Console) linkExternal() (string, error) {
 	res, err := http.Get(url)
 
 	if err != nil {
-		return "", fmt.Errorf("error while requesting federation: %s", err)
+		return "", errors.Wrapf(err, errFederationRequest)
 	}
 
 	defer res.Body.Close()
 
 	if _, err := io.Copy(buf, res.Body); err != nil {
-		return "", fmt.Errorf("error while receiving federation response body: %s", err)
+		return "", errors.Wrapf(err, errFederationResponse)
 	}
 
 	var body map[string]string
 
 	if err := json.Unmarshal(buf.Bytes(), &body); err != nil {
-		return "", fmt.Errorf("error while unmarshaling sign-in token: %s", err)
+		return "", errors.Wrapf(err, errFederationUnmarshal)
 	}
 
 	var (

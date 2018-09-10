@@ -16,6 +16,7 @@ const (
 	errProfileCacheLoadFailed  = "failed to load cached profile %q: %s"
 	errProfileCacheSaveFailed  = "failed to save cached profile %q: %s"
 	errProfileNotFound         = "no such profile %q configured"
+	logSessionExpires          = "session will expire (after applying grace) %s"
 	logStrategyWithProfile     = "using strategy %q (cache: %t) for profile %q"
 )
 
@@ -131,7 +132,7 @@ func Apply(cfg *config.Config) (*credentials.Credentials, error) {
 	}
 
 	if last.Expires.Second() > 0 {
-		log.Debug("session will expire (after applying grace) %s", human.Time(last.Expires))
+		log.Debug(logSessionExpires, human.Time(last.Expires))
 	}
 
 	return last, nil

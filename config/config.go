@@ -7,6 +7,10 @@ import (
 	"github.com/kreuzwerker/awsu/log"
 )
 
+const (
+	errInvalidDuration = "invalid grace %q for duration %q"
+)
+
 // Config is the central configuration struct of awsu
 type Config struct {
 	ConfigFile            string        `mapstructure:"config-file"`
@@ -42,7 +46,7 @@ func (c *Config) Init() error {
 	c.Profiles = profiles
 
 	if c.Duration.Seconds() <= c.Grace.Seconds() {
-		return fmt.Errorf("invalid grace %q for duration %q", c.Grace.String(), c.Duration.String())
+		return fmt.Errorf(errInvalidDuration, c.Grace.String(), c.Duration.String())
 	}
 
 	return nil

@@ -7,6 +7,10 @@ import (
 	ini "gopkg.in/ini.v1"
 )
 
+const (
+	errFailedToOpen = "failed to open %q"
+)
+
 // Profiles is map of profile names to profiles
 type Profiles map[string]*Profile
 
@@ -32,7 +36,7 @@ func Load(files ...string) (Profiles, error) {
 		buf, err := ioutil.ReadFile(file)
 
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to open %q", file)
+			return nil, errors.Wrapf(err, errFailedToOpen, file)
 		}
 
 		loaded = append(loaded, file)

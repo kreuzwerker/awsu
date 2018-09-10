@@ -12,10 +12,12 @@ import (
 	"github.com/kreuzwerker/awsu/config"
 	"github.com/kreuzwerker/awsu/log"
 	"github.com/kreuzwerker/awsu/strategy/credentials"
+	"github.com/pkg/errors"
 )
 
 const (
-	errAssumeRoleFailed = "failed to assume role %q: %s"
+	errAssumeRoleFailed = "failed to assume role %q"
+	logAssumingRole     = "assuming role %q using profile %s (sid %s)"
 )
 
 type AssumeRole struct {
@@ -32,7 +34,7 @@ func (a *AssumeRole) Credentials(sess *session.Session) (*credentials.Credential
 		sid     = a.sessionName()
 	)
 
-	log.Debug("assuming role %q using profile %s (sid %s)", profile.RoleARN, profile.Name, sid)
+	log.Debug(logAssumingRole, profile.RoleARN, profile.Name, sid)
 
 	req := &sts.AssumeRoleInput{
 		DurationSeconds: aws.Int64(int64(a.Duration.Seconds())),
@@ -47,7 +49,7 @@ func (a *AssumeRole) Credentials(sess *session.Session) (*credentials.Credential
 	res, err := client.AssumeRole(req)
 
 	if err != nil {
-		return nil, fmt.Errorf(errAssumeRoleFailed, profile.RoleARN, err)
+		return nil, errors.Wrapf(err, errAssumeRoleFailed, profile.RoleARN)
 	}
 
 	creds := credentials.NewShortTerm(
