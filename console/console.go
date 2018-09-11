@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/arn"
+	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/kreuzwerker/awsu/config"
 	"github.com/kreuzwerker/awsu/strategy"
 	"github.com/pkg/errors"
@@ -22,6 +23,7 @@ type Console struct {
 }
 
 const (
+	errCallerIdentity      = "failed to determine caller identity"
 	errFederationMarshal   = "failed to marshal federation session"
 	errFederationRequest   = "failed to request federation"
 	errFederationResponse  = "failed to receive federation response body"
@@ -48,10 +50,14 @@ func New(conf *config.Config) (*Console, error) {
 // Link returns a link to the AWS console
 func (c *Console) Link() (string, error) {
 
-	var f = c.internal
+	var f func() (string, error)
 
-	if c.profile.ExternalID != "" {
+	if c.profile.IsLongTerm() {
+		f = c.longterm
+	} else if c.profile.ExternalID != "" {
 		f = c.external
+	} else {
+		f = c.internal
 	}
 
 	return f()
@@ -129,6 +135,36 @@ func (c *Console) internal() (string, error) {
 		a.AccountID,
 		strings.TrimPrefix(a.Resource, "role/"),
 		c.profile.Name)
+
+	return url, nil
+
+}
+
+// longterm returns a console link for an IAM user
+func (c *Console) longterm() (string, error) {
+
+	creds, err := strategy.Apply(c.conf)
+
+	if err != nil {
+		return "", err
+	}
+
+	client := sts.New(creds.NewSession())
+
+	res, err := client.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+
+	if err != nil {
+		return "", errors.Wrapf(err, errCallerIdentity)
+	}
+
+	// TODO: make this configurable
+	region := "eu-west-1"
+
+	url := fmt.Sprintf("https://signin.aws.amazon.com/oauth?redirect_uri=https://%s.console.aws.amazon.com/console/home?region=%s&client_id=arn:aws:iam::015428540659:user/homepage&response_type=code&iam_user=true&account=%s",
+		region,
+		region,
+		*res.Account,
+	)
 
 	return url, nil
 

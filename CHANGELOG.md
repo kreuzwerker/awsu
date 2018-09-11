@@ -7,6 +7,7 @@ All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will 
 ### Added
 
 - Added environment variables and config flags for all configuration mechanisms
+- Added support for long-term credential console link generation
 
 ### Changed
 
