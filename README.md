@@ -4,7 +4,7 @@
 
 `awsu` provides a convenient integration of [AWS](https://aws.amazon.com/) virtual [MFA devices](https://aws.amazon.com/iam/details/mfa/) into commandline based workflows. It does use [Yubikeys](https://www.yubico.com/) to provide the underlying [TOTP](https://tools.ietf.org/html/rfc6238) one-time passwords but does not rely on additional external infrastructure such as e.g. federation.
 
-[TOC]
+[ [Installation](#installation) | [Usage](#usage) | [Configuration](#configuration) | [Caching](#caching) | [Commands](#commands) | [General multifactor considerations](#general-multifactor-considerations) ]
 
 # Installation
 
@@ -20,7 +20,7 @@ Linux is only available for download from the relase tab. No Windows builds are 
 
 `awsu` relies on [shared credentials files](https://aws.amazon.com/blogs/security/a-new-and-standardized-way-to-manage-credentials-in-the-aws-sdks/) (the same configuration files that other tools such as e.g. the [AWS commandline utilities](https://aws.amazon.com/cli/) are also using) being configured. The profiles are used to determine
 
-1. which IAM long-term credentials ([access key pairs](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys)) are going to be used 
+1. which IAM long-term credentials ([access key pairs](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys)) are going to be used
 2. if a / which virtual MFA device is going to be used
 3. if a / which [IAM role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html) is going be used
 
@@ -96,7 +96,7 @@ These options describe the currently selected profile and the locations of the s
 
 ### Short-term credentials
 
-These options describe caching options, session token and role durations and other aspects of short-term credentials. 
+These options describe caching options, session token and role durations and other aspects of short-term credentials.
 
 | Description                                                  | Long        | Short | Environment      | Default                                                      |
 | ------------------------------------------------------------ | ----------- | ----- | ---------------- | ------------------------------------------------------------ |
@@ -120,7 +120,7 @@ The duration is always equivalent to the duration of the session token used whic
 
 The grace period is the minimum safe distance to the duration before it's considered invalid (45 minutes by default). This is useful for dealing with long-running deployments that might be interrupted when e.g. a role becomes invalid mid-deployment.
 
-Example: in the default setting with a duration of 1 hour and a grace period of 45 minutes `awsu` will consider cached credentials invalid after 15 minutes. 
+Example: in the default setting with a duration of 1 hour and a grace period of 45 minutes `awsu` will consider cached credentials invalid after 15 minutes.
 
 ## Commands
 
@@ -152,7 +152,7 @@ alias terraform="awsu -v -- terraform"
 
 Note that when using this alias style:
 
-1. you can always reference the alias targets with absolute paths to temporarily escape, e.g. by referring to `aws` as e.g. `/usr/local/bin/aws` 
+1. you can always reference the alias targets with absolute paths to temporarily escape, e.g. by referring to `aws` as e.g. `/usr/local/bin/aws`
 2. you can still configure `awsu` by using the environment variable style of parameter passing
 
 ### Register
@@ -167,7 +167,7 @@ After successful registration `awsu` will log the serial of the MFA for usage as
 
 #### Parameters
 
-The following parameters are exclusive to `register`. 
+The following parameters are exclusive to `register`.
 
 | Description                                                  | Long     | Short | Environment   | Default  |
 | ------------------------------------------------------------ | -------- | ----- | ------------- | -------- |
@@ -193,7 +193,7 @@ The following parameters are exclusive to `register`.
 
 #### Parameters
 
-The following parameters are exclusive to `console`. 
+The following parameters are exclusive to `console`.
 
 | Description                                                  | Long   | Short | Environment | Default |
 | ------------------------------------------------------------ | ------ | ----- | ----------- | ------- |
@@ -208,7 +208,7 @@ The goal of this section is to consider the multifactor options that are availab
    2. Hard to restrict to the right people in an organization e.g. your operators network vs. your backoffice network or guest wifi network
    3. Some impact on remote workers - you'll need a VPN solution that routes all traffic for [AWS IP addresses](https://docs.aws.amazon.com/general/latest/gr/aws-ip-ranges.html) (or just all traffic)
    4. Difficult to spoof unless you are a very privileged attacker
-2. Restricing access by proving the possession of a [virtual or hardware MFA device](https://aws.amazon.com/iam/details/mfa/), specifically a device that can emit 6-digits [TOTP](https://tools.ietf.org/html/rfc6238) one-time passwords (OTP) 
+2. Restricing access by proving the possession of a [virtual or hardware MFA device](https://aws.amazon.com/iam/details/mfa/), specifically a device that can emit 6-digits [TOTP](https://tools.ietf.org/html/rfc6238) one-time passwords (OTP)
    1. More difficult to implement in AWS since you'll want to introduce smartcards as sources for OTPs (unless users want to type in OTPs every _n_ minutes) - `awsu` supports [Yubikey](https://www.yubico.com/products/yubikey-hardware/) USB smartcards here
    2. Easy to restrict in usage to the right people since MFA devices are first-class entities in IAM
    3. No impact on remote workers
@@ -284,7 +284,7 @@ When applied to a trust policy, the requirement is only enforced when _assuming 
 Since an assumed role also has an explicit time-to-live that is clearly visible to users only using trust policies for MFA conditions makes MFA based second factors easier to handle in practice. This approach can be summarized as following:
 
 1. A role requires the proof of posession once at the beginning of it's lifetime through an `aws:MultiFactorAuthAge` condition that should set to the duration attribute (the maximum lifetime) of a role (as discussed above: since an older session token could have been used to assume the role, the "boolean" form is not sufficient)
-2. The longer a role can last, the greater the window of opportunity gets for an attacker to gain control of the principal (e.g. by gaining access to the computer where the short-term credentials reside) 
+2. The longer a role can last, the greater the window of opportunity gets for an attacker to gain control of the principal (e.g. by gaining access to the computer where the short-term credentials reside)
 3. Therefore long lasting session should have less permissions than shorter lasting roles
 
 This summary leads to the following basic setup recommendations:
@@ -296,7 +296,7 @@ This summary leads to the following basic setup recommendations:
    3. Consider adopting an [AWS Organization setup with multiple member accounts](https://aws.amazon.com/answers/account-management/aws-multi-account-security-strategy/) and locate these roles in different accounts
 3. Map the right to assume these IAM roles to IAM groups
    1. Also give users in these groups (by using [policy variables](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_variables.html)) the right to [create](https://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateVirtualMFADevice.html) and [enable](https://docs.aws.amazon.com/IAM/latest/APIReference/API_EnableMFADevice.html) a virtual MFA device for themselves
-   2. Do not directly allow them to [deactive](https://docs.aws.amazon.com/IAM/latest/APIReference/API_DeactivateMFADevice.html) and [delete](https://docs.aws.amazon.com/IAM/latest/APIReference/API_DeleteVirtualMFADevice.html) their own MFA device (this would allow an attacker to simply replace an MFA device with one they control) - monitor deletions via CloudTrail and consider outsourcing this to dedicated privileged users or - at minimum - require second factors for the MFA deletion alone (directly or via a role dedicated to this purpose) 
+   2. Do not directly allow them to [deactive](https://docs.aws.amazon.com/IAM/latest/APIReference/API_DeactivateMFADevice.html) and [delete](https://docs.aws.amazon.com/IAM/latest/APIReference/API_DeleteVirtualMFADevice.html) their own MFA device (this would allow an attacker to simply replace an MFA device with one they control) - monitor deletions via CloudTrail and consider outsourcing this to dedicated privileged users or - at minimum - require second factors for the MFA deletion alone (directly or via a role dedicated to this purpose)
 4. Do not give IAM users any other direct permissions
 5. Add IAM users to IAM groups appropriate for their function roles
 
