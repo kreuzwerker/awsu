@@ -11,8 +11,9 @@ All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will 
 
 ### Changed
 
-- Fixed expires output bug and added expiry hints.
+- Fixed expires output bug and added expiry hints
 - Added better looking error handling
+- Massive update to the `README`
 
 #### Internal
 
