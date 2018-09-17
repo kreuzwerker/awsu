@@ -6,10 +6,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Version describe the version of awsu
 type Version struct {
 	Build, Time, Version string
 }
 
+// String returns a string representation of the version
 func (v Version) String() string {
 	return fmt.Sprintf("%s version %s (%s, %s)", app, v.Version, v.Build, v.Time)
 }

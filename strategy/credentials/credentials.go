@@ -1,4 +1,4 @@
-package aquirer
+package credentials
 
 import (
 	"encoding/json"
@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/kreuzwerker/awsu/log"
@@ -18,14 +19,51 @@ import (
 	"github.com/yawn/envmap"
 )
 
+const (
+	errInvalidCredentials = "cached credentials are invalid"
+	logExec               = "running %q with args %q"
+	logLoadingCredentials = "loading cached credentials from %q"
+	logSavingCredentials  = "saving cached credentials to %q"
+)
+
+// Credentials encapsulates cacheable credentials that can convert to actual
+// session and can be used to aquire further credential
 type Credentials struct {
 	credentials.Value
 	Expires time.Time
 	Profile string
 }
 
-// LoadCredentials loads cached credentials
-func LoadCredentials(profile string) (*Credentials, error) {
+// NewLongTerm is a constructor for long term credentials
+func NewLongTerm(profile, accessKeyID, secretAccessKey string) *Credentials {
+
+	return &Credentials{
+		Value: credentials.Value{
+			AccessKeyID:     accessKeyID,
+			SecretAccessKey: secretAccessKey,
+		},
+		Profile: profile,
+	}
+
+}
+
+// NewShortTerm is a constructor for short term credentials with expiry
+func NewShortTerm(profile, accessKeyID, secretAccessKey, sessionToken string, expires time.Time) *Credentials {
+
+	return &Credentials{
+		Value: credentials.Value{
+			AccessKeyID:     accessKeyID,
+			SecretAccessKey: secretAccessKey,
+			SessionToken:    sessionToken,
+		},
+		Expires: expires,
+		Profile: profile,
+	}
+
+}
+
+// Load loads cached credentials
+func Load(profile string) (*Credentials, error) {
 
 	path, err := cachePath(profile)
 
@@ -33,7 +71,7 @@ func LoadCredentials(profile string) (*Credentials, error) {
 		return nil, err
 	}
 
-	log.Log("loading cached credentials from %q", path)
+	log.Debug(logLoadingCredentials, path)
 
 	raw, err := ioutil.ReadFile(path)
 
@@ -48,7 +86,7 @@ func LoadCredentials(profile string) (*Credentials, error) {
 	}
 
 	if !creds.IsValid() {
-		return nil, fmt.Errorf("existing credentials are invalid")
+		return nil, fmt.Errorf(errInvalidCredentials)
 	}
 
 	return creds, nil
@@ -60,7 +98,7 @@ func (c *Credentials) Exec(app string, args []string) error {
 
 	env := envmap.Import()
 
-	if c.Expires != (time.Time{}) {
+	if c.Expires.Second() > 0 {
 		env["AWSU_EXPIRES"] = c.Expires.Format(time.RFC3339)
 	}
 
@@ -75,14 +113,41 @@ func (c *Credentials) Exec(app string, args []string) error {
 		return err
 	}
 
-	log.Log("running %q with args %q", cmd, args)
+	log.Debug(logExec, cmd, args)
 
 	return syscall.Exec(cmd, args, env.ToEnv())
 
 }
 
+// IsValid indicates if a loaded credential is (still) valid
 func (c *Credentials) IsValid() bool {
 	return time.Now().Before(c.Expires)
+}
+
+// NewSession creates a new session with these credentials
+func (c *Credentials) NewSession() *session.Session {
+	return c.UpdateSession(session.New(&aws.Config{}))
+}
+
+// Save saves (caches) credentials
+func (c *Credentials) Save() error {
+
+	path, err := cachePath(c.Profile)
+
+	if err != nil {
+		return err
+	}
+
+	log.Debug(logSavingCredentials, path)
+
+	out, err := json.Marshal(c)
+
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(path, out, 0600)
+
 }
 
 // String returns a string representation of these credentials, suitable for eval()
@@ -102,6 +167,7 @@ func (c *Credentials) String() string {
 
 }
 
+// UpdateSession updates a given session with this credentials
 func (c *Credentials) UpdateSession(sess *session.Session) *session.Session {
 
 	sess.Config.Credentials = credentials.NewStaticCredentials(
@@ -111,27 +177,6 @@ func (c *Credentials) UpdateSession(sess *session.Session) *session.Session {
 	)
 
 	return sess
-
-}
-
-// Save caches credentials
-func (c *Credentials) Save() error {
-
-	path, err := cachePath(c.Profile)
-
-	if err != nil {
-		return err
-	}
-
-	log.Log("saving session to %q", path)
-
-	out, err := json.Marshal(c)
-
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(path, out, 0600)
 
 }
 
@@ -151,31 +196,5 @@ func cachePath(profile string) (string, error) {
 	}
 
 	return filepath.Join(dir, fmt.Sprintf("%s.json", profile)), nil
-
-}
-
-func newLongTermCredentials(profile, accessKeyId, secretAccessKey string) *Credentials {
-
-	return &Credentials{
-		Value: credentials.Value{
-			AccessKeyID:     accessKeyId,
-			SecretAccessKey: secretAccessKey,
-		},
-		Profile: profile,
-	}
-
-}
-
-func newShortTermCredentials(profile, accessKeyId, secretAccessKey, sessionToken string, expires time.Time) *Credentials {
-
-	return &Credentials{
-		Value: credentials.Value{
-			AccessKeyID:     accessKeyId,
-			SecretAccessKey: secretAccessKey,
-			SessionToken:    sessionToken,
-		},
-		Expires: expires,
-		Profile: profile,
-	}
 
 }

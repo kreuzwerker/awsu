@@ -2,6 +2,29 @@
 
 All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will be documented in this file.
 
+## [2.3.0]
+
+### Added
+
+- Added environment variables and config flags for all configuration mechanisms
+- Added support for long-term credential console link generation
+
+### Changed
+
+- Fixed expires output bug and added expiry hints
+- Added better looking error handling
+- Massive update to the `README`
+
+#### Internal
+
+- Removed cache and session ttl mechanism and replaced it with duration and grace
+- Created new client structure with explicit generators, sources and target  
+- Moved logic for console out of the command and into a dedicated helper
+
+### Removed
+
+- Removed "list" command
+
 ## [2.2.1]
 
 ### Added

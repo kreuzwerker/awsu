@@ -7,49 +7,30 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/defaults"
 	"github.com/kreuzwerker/awsu/config"
-	"github.com/kreuzwerker/awsu/log"
+	"github.com/kreuzwerker/awsu/strategy"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/yawn/doubledash"
 )
 
-var rootConfig *config.Config
-
-var rootFlags = struct {
-	cacheTTL              time.Duration
-	configFile            string
-	generator             string
-	mfaSerial             string
-	noCache               bool
-	profile               string
-	sessionTTL            time.Duration
-	sharedCredentialsFile string
-	verbose               bool
-}{}
+var conf config.Config
 
 var rootCmd = &cobra.Command{
-	Use: app,
+	Use:           app,
+	SilenceErrors: true,
+	SilenceUsage:  true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
-		rootConfig = config.NewConfig()
-
-		if rootConfig.Verbose {
-			log.Debug = true
+		if err := viper.Unmarshal(&conf); err != nil {
+			return err
 		}
 
-		var err error
-
-		rootConfig.Profiles, err = config.Load(
-			rootConfig.ConfigFile,
-			rootConfig.SharedCredentialsFile,
-		)
-
-		return err
+		return conf.Init()
 
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		creds, err := newSession(rootConfig)
+		creds, err := strategy.Apply(&conf)
 
 		if err != nil {
 			return err
@@ -70,40 +51,76 @@ func init() {
 
 	os.Args = doubledash.Args
 
-	rootCmd.PersistentFlags().DurationP(config.KeyCacheTTL, "t", 1*time.Hour, "time to live for cached role credentials")
-	viper.BindPFlag(config.KeyCacheTTL, rootCmd.PersistentFlags().Lookup(config.KeyCacheTTL))
-	viper.BindEnv(config.KeyCacheTTL, "AWSU_CACHE_ROLE_TTL")
+	flag(rootCmd.PersistentFlags(),
+		defaults.SharedCredentialsFilename(),
+		"config-file",
+		"c",
+		"AWS_CONFIG_FILE",
+		"sets the config file",
+	)
 
-	viper.BindEnv(config.KeyConfigFile, "AWS_CONFIG_FILE")
-	viper.SetDefault(config.KeyConfigFile, defaults.SharedCredentialsFilename())
+	flag(rootCmd.PersistentFlags(),
+		1*time.Hour,
+		"duration",
+		"d",
+		"AWSU_DURATION",
+		"duration to use for session tokens and roles",
+	)
 
-	rootCmd.PersistentFlags().StringVarP(&rootFlags.generator, config.KeyGenerator, "g", "yubikey", "configure the token generator (yubikey or manual)")
-	viper.BindPFlag(config.KeyGenerator, rootCmd.PersistentFlags().Lookup(config.KeyGenerator))
-	viper.BindEnv(config.KeyGenerator, "AWSU_TOKEN_GENERATOR")
+	flag(rootCmd.PersistentFlags(),
+		"",
+		"mfa-serial",
+		"m",
+		"AWSU_MFA_SERIAL",
+		"set or override MFA serial",
+	)
 
-	rootCmd.PersistentFlags().StringVarP(&rootFlags.mfaSerial, config.KeyMFASerial, "m", "", "set or override MFA serial")
-	viper.BindPFlag(config.KeyMFASerial, rootCmd.PersistentFlags().Lookup(config.KeyMFASerial))
-	viper.BindEnv(config.KeyMFASerial, "AWSU_MFA_SERIAL")
+	flag(rootCmd.PersistentFlags(),
+		"yubikey",
+		"generator",
+		"g",
+		"AWSU_TOKEN_GENERATOR",
+		"configure the token generator to 'yubikey' or 'manual'",
+	)
 
-	rootCmd.PersistentFlags().BoolVarP(&rootFlags.noCache, config.KeyNoCache, "n", false, "disable caching of short-term credentials")
-	viper.BindPFlag(config.KeyNoCache, rootCmd.PersistentFlags().Lookup(config.KeyNoCache))
-	viper.BindEnv(config.KeyNoCache, "AWSU_NO_CACHE")
+	flag(rootCmd.PersistentFlags(),
+		45*time.Minute,
+		"grace",
+		"r",
+		"AWSU_GRACE",
+		"distance to the duration before a cache credential is considered expired",
+	)
 
-	// TODO: enable config file workspace mapping here
-	rootCmd.PersistentFlags().StringVarP(&rootFlags.profile, config.KeyProfile, "p", "", "shared config profile to use")
-	viper.BindPFlag(config.KeyProfile, rootCmd.PersistentFlags().Lookup(config.KeyProfile))
-	viper.BindEnv(config.KeyProfile, "AWS_PROFILE")
-	viper.SetDefault(config.KeyProfile, "default")
+	flag(rootCmd.PersistentFlags(),
+		false,
+		"no-cache",
+		"n",
+		"AWSU_NO_CACHE",
+		"disable caching of short-term credentials",
+	)
 
-	rootCmd.PersistentFlags().DurationP(config.KeySessionTTL, "s", 8*time.Hour, "time to live for cached session token credentials")
-	viper.BindPFlag(config.KeySessionTTL, rootCmd.PersistentFlags().Lookup(config.KeySessionTTL))
-	viper.BindEnv(config.KeySessionTTL, "AWSU_CACHE_SESSION_TOKEN_TTL")
+	flag(rootCmd.PersistentFlags(),
+		"default",
+		"profile",
+		"p",
+		"AWS_PROFILE",
+		"shared config profile to use",
+	)
 
-	viper.BindEnv(config.KeySharedCredentialsFile, "AWS_SHARED_CREDENTIALS_FILE")
-	viper.SetDefault(config.KeySharedCredentialsFile, defaults.SharedConfigFilename())
+	flag(rootCmd.PersistentFlags(),
+		defaults.SharedCredentialsFilename(),
+		"shared-credentials-file",
+		"s",
+		"AWS_SHARED_CREDENTIALS_FILE",
+		"shared credentials file to use",
+	)
 
-	rootCmd.PersistentFlags().BoolP(config.KeyVerbose, "v", false, "enable verbose operations")
-	viper.BindPFlag(config.KeyVerbose, rootCmd.PersistentFlags().Lookup(config.KeyVerbose))
-	viper.BindEnv(config.KeyVerbose, "AWSU_VERBOSE")
+	flag(rootCmd.PersistentFlags(),
+		false,
+		"verbose",
+		"v",
+		"AWSU_VERBOSE",
+		"enable verbose logging",
+	)
 
 }

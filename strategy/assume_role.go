@@ -1,4 +1,4 @@
-package aquirer
+package strategy
 
 import (
 	"crypto/rand"
@@ -11,19 +11,24 @@ import (
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/kreuzwerker/awsu/config"
 	"github.com/kreuzwerker/awsu/log"
+	"github.com/kreuzwerker/awsu/strategy/credentials"
+	"github.com/pkg/errors"
 )
 
 const (
-	errAssumeRoleFailed = "failed to assume role %q: %s"
+	errAssumeRoleFailed = "failed to assume role %q"
+	logAssumingRole     = "assuming role %q using profile %s (sid %s)"
 )
 
+// AssumeRole is a strategy that assumes IAM roles
 type AssumeRole struct {
 	Duration time.Duration
 	Grace    time.Duration
 	Profiles []*config.Profile
 }
 
-func (a *AssumeRole) Credentials(sess *session.Session) (*Credentials, error) {
+// Credentials aquires actual credentials
+func (a *AssumeRole) Credentials(sess *session.Session) (*credentials.Credentials, error) {
 
 	var (
 		client  = sts.New(sess)
@@ -31,7 +36,7 @@ func (a *AssumeRole) Credentials(sess *session.Session) (*Credentials, error) {
 		sid     = a.sessionName()
 	)
 
-	log.Log("assuming role %q using profile %s (sid %s)", profile.RoleARN, profile.Name, sid)
+	log.Debug(logAssumingRole, profile.RoleARN, profile.Name, sid)
 
 	req := &sts.AssumeRoleInput{
 		DurationSeconds: aws.Int64(int64(a.Duration.Seconds())),
@@ -46,10 +51,10 @@ func (a *AssumeRole) Credentials(sess *session.Session) (*Credentials, error) {
 	res, err := client.AssumeRole(req)
 
 	if err != nil {
-		return nil, fmt.Errorf(errAssumeRoleFailed, profile.RoleARN, err)
+		return nil, errors.Wrapf(err, errAssumeRoleFailed, profile.RoleARN)
 	}
 
-	creds := newShortTermCredentials(
+	creds := credentials.NewShortTerm(
 		profile.Name,
 		*res.Credentials.AccessKeyId,
 		*res.Credentials.SecretAccessKey,
@@ -61,14 +66,17 @@ func (a *AssumeRole) Credentials(sess *session.Session) (*Credentials, error) {
 
 }
 
+// IsCacheable indicates the output of this strategy can be cached (always true)
 func (a *AssumeRole) IsCacheable() bool {
 	return true
 }
 
+// Name returns the name of this strategy
 func (a *AssumeRole) Name() string {
 	return "assume_role"
 }
 
+// Profile returns the name of the profile used (if applicable, otherwise nil)
 func (a *AssumeRole) Profile() *config.Profile {
 
 	for _, profile := range a.Profiles {
@@ -83,6 +91,7 @@ func (a *AssumeRole) Profile() *config.Profile {
 
 }
 
+// sessionName returns the name give to the assumed role sessions
 func (a *AssumeRole) sessionName() string {
 
 	var rid [16]byte
