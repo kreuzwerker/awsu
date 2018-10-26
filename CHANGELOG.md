@@ -2,6 +2,12 @@
 
 All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will be documented in this file.
 
+## [2.3.1] (unreleased)
+
+### Changed
+
+- Fixed wrong default for config file (#31)
+
 ## [2.3.0]
 
 ### Added

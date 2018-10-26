@@ -52,7 +52,7 @@ func init() {
 	os.Args = doubledash.Args
 
 	flag(rootCmd.PersistentFlags(),
-		defaults.SharedCredentialsFilename(),
+		defaults.SharedConfigFilename(),
 		"config-file",
 		"c",
 		"AWS_CONFIG_FILE",
