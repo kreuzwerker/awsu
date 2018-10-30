@@ -199,6 +199,13 @@ The following parameters are exclusive to `console`.
 | ------------------------------------------------------------ | ------ | ----- | ----------- | ------- |
 | Opens the resulting link in a browser (as opposed to just returning it) | `open` | `o`   | `-`         | `true`  |
 
+### Token
+
+`awsu token` will generate a fresh one-time password from an inserted Yubikey. In order to determine the correct secret it will
+
+1. use the MFA directly configured on the currently used `profile` or
+2. use the the MFA configured through the `mfa-serial` parameter.
+
 # General multifactor considerations
 
 The goal of this section is to consider the multifactor options that are available on AWS without involving additional external infrastructure (e.g. by utilizing [federation](https://aws.amazon.com/identity/federation/)). Under these constraints there are two options available:

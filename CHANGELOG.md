@@ -4,6 +4,10 @@ All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will 
 
 ## [2.3.1] (unreleased)
 
+### Added
+
+- Added support for command to generate OTP token on Yubikey and return it to stdout (#32)
+
 ### Changed
 
 - Fixed wrong default for config file (#31)
