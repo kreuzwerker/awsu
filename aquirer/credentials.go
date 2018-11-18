@@ -97,7 +97,7 @@ func (c *Credentials) String(forDocker bool) string {
     }
 
 	if c.SessionToken != "" {
-		parts = append(parts, fmt.Sprintf("export AWS_SESSION_TOKEN=%s", c.SessionToken))
+		parts = append(parts, fmt.Sprintf("%sAWS_SESSION_TOKEN=%s", export, c.SessionToken))
 	}
 
 	return strings.Join(parts, "\n")
