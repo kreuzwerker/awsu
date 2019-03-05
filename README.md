@@ -4,6 +4,10 @@
 
 `awsu` provides a convenient integration of [AWS](https://aws.amazon.com/) virtual [MFA devices](https://aws.amazon.com/iam/details/mfa/) into commandline based workflows. It does use [Yubikeys](https://www.yubico.com/) to provide the underlying [TOTP](https://tools.ietf.org/html/rfc6238) one-time passwords but does not rely on additional external infrastructure such as e.g. federation.
 
+There is also a high-level video overview from [This Is My Architecture](https://amzn.to/2Tpiv1m) Munich:
+
+[![Video overview](https://img.youtube.com/vi/4FUqak5E_CA/0.jpg)](https://www.youtube.com/watch?v=4FUqak5E_CA)
+
 [ [Installation](#installation) | [Usage](#usage) | [Configuration](#configuration) | [Caching](#caching) | [Commands](#commands) | [General multifactor considerations](#general-multifactor-considerations) ]
 
 # Installation
