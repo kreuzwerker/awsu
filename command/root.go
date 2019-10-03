@@ -40,6 +40,11 @@ var rootCmd = &cobra.Command{
 			return creds.Exec(doubledash.Xtra[0], doubledash.Xtra)
 		}
 
+		if conf.Write {
+			creds.Write(&conf)
+			return nil
+		}
+
 		fmt.Println(creds.String())
 
 		return nil
@@ -123,4 +128,11 @@ func init() {
 		"enable verbose logging",
 	)
 
+	flag(rootCmd.PersistentFlags(),
+		false,
+		"write",
+		"w",
+		"AWSU_WRITE",
+		"write generated credentials to shared credentials file instead of printing them to stdout",
+	)
 }

@@ -25,6 +25,7 @@ type Config struct {
 	Register              *Register     `mapstructure:"-"`
 	SharedCredentialsFile string        `mapstructure:"shared-credentials-file"`
 	Verbose               bool          `mapstructure:"verbose"`
+	Write                 bool          `mapstructure:"write"`
 }
 
 // Init will perform post config initializations and validations

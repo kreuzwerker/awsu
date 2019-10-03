@@ -142,6 +142,10 @@ eval $(awsu)
 
 After using export mode, credentials can used until they expire.
 
+When you pass the `-w` option , the credentials are be written to the shared credentials file instead. This might be useful if you're launching an application from an IDE that does not have access to the exported variables.
+
+A new profile is created in the shared credentials file. It is named `:profile-awsu-temp`.
+
 #### Exec mode
 
 When `awsu` is invoked with a doubledash (`--`) as the last argument it will execute the application specified after the doubledash (including all arguments) with the resulting credentials being set into the environment of this application.

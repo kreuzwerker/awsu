@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -14,9 +15,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/kreuzwerker/awsu/config"
 	"github.com/kreuzwerker/awsu/log"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/yawn/envmap"
+	ini "gopkg.in/ini.v1"
 )
 
 const (
@@ -164,6 +167,49 @@ func (c *Credentials) String() string {
 	}
 
 	return strings.Join(parts, "\n")
+
+}
+
+// Write writes the credentials as a new profile to the shared config file
+func (c *Credentials) Write(cfg *config.Config) error {
+
+	sharedCredentialsFile := cfg.SharedCredentialsFile
+
+	iniFile, err := ini.Load(sharedCredentialsFile)
+	if err != nil {
+		return err
+	}
+
+	credsFolderPath := path.Dir(sharedCredentialsFile)
+
+	os.MkdirAll(credsFolderPath, os.ModePerm)
+
+	tempCredsFilePath := sharedCredentialsFile + ".tmp"
+
+	f, err := os.Create(tempCredsFilePath)
+	if err != nil {
+		return err
+	}
+
+	section := iniFile.Section(cfg.Profile + "-awsu-temp")
+	section.NewKey("aws_access_key_id", c.AccessKeyID)
+	section.NewKey("aws_secret_access_key", c.SecretAccessKey)
+	if c.SessionToken != "" {
+		section.NewKey("aws_session_token", c.SessionToken)
+	}
+
+	_, err = iniFile.WriteTo(f)
+	f.Close()
+	if err != nil {
+		return err
+	}
+
+	err = os.Rename(sharedCredentialsFile, sharedCredentialsFile+".backup")
+	if err != nil {
+		return err
+	}
+
+	return os.Rename(tempCredsFilePath, sharedCredentialsFile)
 
 }
 
