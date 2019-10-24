@@ -2,7 +2,18 @@
 
 All notable [changes](http://keepachangelog.com/en/1.0.0/) to this project will be documented in this file.
 
-## [2.3.1] (unreleased)
+## [2.3.2]
+
+### Added
+
+- Add small documentation regarding the usage of the magic account ID (#35)
+
+### Changed
+
+- Updated dependencies and fixed Catalina compatibility (#39) - thanks @nauxliu
+- Fixed typo in `README` (#37)
+
+## [2.3.1]
 
 ### Added
 

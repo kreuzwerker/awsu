@@ -18,7 +18,7 @@ Production-ready Mac releases can be installed e.g.through `brew` via [kreuzwerk
 brew tap kreuzwerker/taps && brew install kreuzwerker/taps/awsu
 ```
 
-Linux is only available for download from the relase tab. No Windows builds are provided at the moment.
+Linux is only available for download from the release tab. No Windows builds are provided at the moment.
 
 ## Prequisites
 
