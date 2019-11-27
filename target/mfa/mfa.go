@@ -50,7 +50,7 @@ func New(sess *session.Session, s source.Source) (*MFA, error) {
 
 // Add adds virtual MFA to the source and associates it with the given IAM
 // username and returns MFA serial and TOTP secret
-func (m *MFA) Add(username string) (*string, []byte, error) {
+func (m *MFA) Add(username string, requireTouch bool) (*string, []byte, error) {
 
 	serial, secret, err := m.create(username)
 
@@ -58,7 +58,7 @@ func (m *MFA) Add(username string) (*string, []byte, error) {
 		return nil, nil, err
 	}
 
-	if err := m.enable(username, serial, secret); err != nil {
+	if err := m.enable(username, serial, secret, requireTouch); err != nil {
 		return nil, nil, err
 	}
 
@@ -162,7 +162,7 @@ func (m *MFA) delete(serial *string) error {
 }
 
 // enable enables the virtual MFA device and adds it from the source
-func (m *MFA) enable(username string, serial *string, secret []byte) error {
+func (m *MFA) enable(username string, serial *string, secret []byte, requireTouch bool) error {
 
 	log.Debug(logAddSecretToSource, m.source.Name())
 
@@ -172,17 +172,17 @@ func (m *MFA) enable(username string, serial *string, secret []byte) error {
 		return err
 	}
 
-	if err = m.source.Add(name, secret); err != nil {
+	if err = m.source.Add(name, secret, requireTouch); err != nil {
 		return errors.Wrapf(err, errAddToSource, name, m.source.Name())
 	}
 
-	otp1, err := m.source.Generate(time.Now(), name)
+	otp1, err := m.source.Generate(time.Now(), name, requireTouch)
 
 	if err != nil {
 		return errors.Wrapf(err, errCalculateFirstOTP)
 	}
 
-	otp2, err := m.source.Generate(time.Now().Add(30*time.Second), name)
+	otp2, err := m.source.Generate(time.Now().Add(30*time.Second), name, requireTouch)
 
 	if err != nil {
 		return errors.Wrapf(err, errCalculateSecondOTP)
