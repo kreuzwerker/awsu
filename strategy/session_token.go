@@ -135,7 +135,7 @@ func (s *SessionToken) generate(serial *string) (string, error) {
 		return "", err
 	}
 
-	return g.Generate(time.Now(), name)
+	return g.Generate(time.Now(), name, true)
 
 }
 

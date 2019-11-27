@@ -1,6 +1,7 @@
 package yubikey
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -41,8 +42,8 @@ func New() (*Yubikey, error) {
 }
 
 // Add adds / overwrites a credential to a Yubikey
-func (y *Yubikey) Add(name string, secret []byte) error {
-	return y.client.Put(name, ykoath.HmacSha1, ykoath.Totp, 6, secret, false)
+func (y *Yubikey) Add(name string, secret []byte, requireTouch bool) error {
+	return y.client.Put(name, ykoath.HmacSha1, ykoath.Totp, 6, secret, requireTouch)
 }
 
 // Delete deletes a credential from a Yubikey
@@ -51,7 +52,7 @@ func (y *Yubikey) Delete(name string) error {
 }
 
 // Generate generates a new OTP with a Yubikey
-func (y *Yubikey) Generate(clock time.Time, name string) (string, error) {
+func (y *Yubikey) Generate(clock time.Time, name string, requireTouch bool) (string, error) {
 
 	y.Lock()
 	defer y.Unlock()
@@ -64,7 +65,15 @@ func (y *Yubikey) Generate(clock time.Time, name string) (string, error) {
 		return clock
 	}
 
-	return y.client.Calculate(name, nil)
+	var touchCb func(string) error
+	if requireTouch {
+		touchCb = func(name string) error {
+			fmt.Printf("*** TOUCH YOUR YUBIKEY TO UNLOCK %q ***\n", name)
+			return nil
+		}
+	}
+
+	return y.client.Calculate(name, touchCb)
 
 }
 

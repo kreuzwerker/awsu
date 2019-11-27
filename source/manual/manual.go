@@ -23,7 +23,10 @@ func New() *Manual {
 }
 
 // Generate generates a new OTP by asking for it on the commandline
-func (m *Manual) Generate(clock time.Time, name string) (string, error) {
+func (m *Manual) Generate(clock time.Time, name string, requireTouch bool) (string, error) {
+	if requireTouch {
+		fmt.Fprintf(os.Stderr, "require touch is ignored for manual")
+	}
 
 	fmt.Printf("enter TOTP token for %q: ", name)
 

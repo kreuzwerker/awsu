@@ -48,7 +48,12 @@ var registerCmd = &cobra.Command{
 			return err
 		}
 
-		serial, secret, err := target.Add(username)
+		requireTouch, err := cmd.Flags().GetBool("require-touch")
+		if err != nil {
+			return err
+		}
+
+		serial, secret, err := target.Add(username, requireTouch)
 
 		if err != nil {
 			return err
@@ -90,6 +95,14 @@ func init() {
 		"q",
 		"AWSU_QR",
 		"generate a QR barcode as backup for soft tokens",
+	)
+
+	flag(registerCmd.Flags(),
+		false,
+		"require-touch",
+		"t",
+		"AWSU_REQUIRE_TOUCH",
+		"require touch to generate Yubikey token",
 	)
 
 	rootCmd.AddCommand(registerCmd)

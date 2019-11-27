@@ -47,7 +47,12 @@ var tokenCmd = &cobra.Command{
 			return err
 		}
 
-		otp, err := token.Generate(time.Now(), name)
+		requireTouch, err := cmd.Flags().GetBool("require-touch")
+		if err != nil {
+			return err
+		}
+
+		otp, err := token.Generate(time.Now(), name, requireTouch)
 
 		if err != nil {
 			return err
@@ -61,5 +66,13 @@ var tokenCmd = &cobra.Command{
 }
 
 func init() {
+	flag(tokenCmd.Flags(),
+		false,
+		"require-touch",
+		"t",
+		"AWSU_REQUIRE_TOUCH",
+		"require touch to generate Yubikey token",
+	)
+
 	rootCmd.AddCommand(tokenCmd)
 }
