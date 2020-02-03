@@ -11,12 +11,16 @@ import (
 	"github.com/kreuzwerker/awsu/log"
 	"github.com/kreuzwerker/awsu/source"
 	"github.com/kreuzwerker/awsu/source/manual"
+	"github.com/kreuzwerker/awsu/source/provided"
 	"github.com/kreuzwerker/awsu/source/yubikey"
 	"github.com/kreuzwerker/awsu/strategy/credentials"
 	"github.com/kreuzwerker/awsu/target/mfa"
 )
 
 const (
+	// GenProvided reads OTPs from the environment
+	GenProvided = "provided"
+
 	// GenManual is the "manual" (type-OTP-in) generator
 	GenManual = "manual"
 
@@ -124,6 +128,9 @@ func (s *SessionToken) generate(serial *string) (string, error) {
 
 	case GenManual:
 		g = manual.New()
+
+	case GenProvided:
+		g = provided.New()
 
 	default:
 		return "", fmt.Errorf(errUnknownGenerator, s.Generator)
