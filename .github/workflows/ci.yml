@@ -18,6 +18,9 @@ jobs:
         uses: actions/checkout@v1
         with:
           fetch-depth: 1
+      - name: Prepare
+        if: ${{ matrix.os }} == 'ubuntu-latest'
+        run: apt-get update -q && apt-get install -qqy libpcsclite-dev
       - name: Check
         run: go test -cover ./...
 ...
