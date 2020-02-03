@@ -2,6 +2,7 @@ package config
 
 import (
 	"io/ioutil"
+	"strings"
 
 	"github.com/pkg/errors"
 	ini "gopkg.in/ini.v1"
@@ -53,6 +54,10 @@ func Load(files ...string) (Profiles, error) {
 
 			if name == "preview" {
 				continue
+			}
+
+			if strings.HasPrefix(name, "profile") {
+				name = strings.TrimPrefix(name, "profile ")
 			}
 
 		init:
