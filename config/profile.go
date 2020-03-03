@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"reflect"
 )
 
 // Profile is a long- or short-time credential profile managed in a shared config
@@ -29,4 +30,16 @@ func (p *Profile) Value() credentials.Value {
 		SecretAccessKey: p.SecretAccessKey,
 	}
 
+}
+
+func (p *Profile) Merge(profileToMerge *Profile) {
+	val1 := reflect.ValueOf(p).Elem()
+	val2 := reflect.ValueOf(profileToMerge).Elem()
+
+	for i := 0; i < val1.NumField(); i++ {
+		newFieldValue := val2.Field(i)
+		if !newFieldValue.IsZero() {
+			val1.Field(i).Set(newFieldValue)
+		}
+	}
 }
