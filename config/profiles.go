@@ -2,6 +2,7 @@ package config
 
 import (
 	"io/ioutil"
+	"strings"
 
 	"github.com/pkg/errors"
 	ini "gopkg.in/ini.v1"
@@ -50,6 +51,7 @@ func Load(files ...string) (Profiles, error) {
 		for _, section := range f.Sections() {
 
 			name := section.Name()
+			name = strings.TrimPrefix(name, "profile ")
 
 			if name == "preview" {
 				continue
@@ -64,12 +66,12 @@ func Load(files ...string) (Profiles, error) {
 				goto init
 			}
 
-			if err := section.MapTo(profile); err != nil {
+			sectionProfile := new(Profile)
+			if err := section.MapTo(sectionProfile); err != nil {
 				return nil, err
 			}
-
-			profile.Name = name
-
+			sectionProfile.Name = name
+			profile.Merge(sectionProfile)
 		}
 
 	}
