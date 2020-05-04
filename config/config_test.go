@@ -23,7 +23,7 @@ func TestConfigInitLoad(t *testing.T) {
 	}
 
 	merged := &Config{
-		ConfigFile:            "testdata/config-merged",
+		ConfigFile:            "testdata/merged",
 		Duration:              5 * time.Minute,
 		Grace:                 1 * time.Minute,
 		SharedCredentialsFile: "testdata/merged",
