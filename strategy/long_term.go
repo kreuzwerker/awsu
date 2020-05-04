@@ -18,6 +18,7 @@ func (l *LongTerm) Credentials(sess *session.Session) (*credentials.Credentials,
 	p := l.Profile()
 
 	return credentials.NewLongTerm(p.Name,
+			p.Region,
 			p.AccessKeyID,
 			p.SecretAccessKey),
 		nil

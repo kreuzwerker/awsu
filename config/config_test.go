@@ -43,6 +43,7 @@ func TestConfigInitLoad(t *testing.T) {
 		assert.Equal("wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY", source.SecretAccessKey)
 		assert.Equal(source.AccessKeyID, source.Value().AccessKeyID)
 		assert.Equal(source.SecretAccessKey, source.Value().SecretAccessKey)
+		assert.Equal("us-west-2", source.Region)
 
 		profile, ok := config.Profiles["foo"]
 		require.True(ok)

@@ -10,6 +10,7 @@ type Profile struct {
 	ExternalID      string `ini:"external_id"`
 	MFASerial       string `ini:"mfa_serial"`
 	Name            string
+	Region          string `ini:"region"`
 	RoleARN         string `ini:"role_arn"`
 	SecretAccessKey string `ini:"aws_secret_access_key"`
 	SourceProfile   string `ini:"source_profile"`

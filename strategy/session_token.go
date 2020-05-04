@@ -73,6 +73,7 @@ func (s *SessionToken) Credentials(sess *session.Session) (*credentials.Credenti
 
 	creds := credentials.NewShortTerm(
 		lt.Name,
+		lt.Region,
 		*res.Credentials.AccessKeyId,
 		*res.Credentials.SecretAccessKey,
 		*res.Credentials.SessionToken,

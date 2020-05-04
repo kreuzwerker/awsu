@@ -33,10 +33,11 @@ type Credentials struct {
 	credentials.Value
 	Expires time.Time
 	Profile string
+	Region  string
 }
 
 // NewLongTerm is a constructor for long term credentials
-func NewLongTerm(profile, accessKeyID, secretAccessKey string) *Credentials {
+func NewLongTerm(profile, region, accessKeyID, secretAccessKey string) *Credentials {
 
 	return &Credentials{
 		Value: credentials.Value{
@@ -44,12 +45,13 @@ func NewLongTerm(profile, accessKeyID, secretAccessKey string) *Credentials {
 			SecretAccessKey: secretAccessKey,
 		},
 		Profile: profile,
+		Region:  region,
 	}
 
 }
 
 // NewShortTerm is a constructor for short term credentials with expiry
-func NewShortTerm(profile, accessKeyID, secretAccessKey, sessionToken string, expires time.Time) *Credentials {
+func NewShortTerm(profile, region, accessKeyID, secretAccessKey, sessionToken string, expires time.Time) *Credentials {
 
 	return &Credentials{
 		Value: credentials.Value{
@@ -59,6 +61,7 @@ func NewShortTerm(profile, accessKeyID, secretAccessKey, sessionToken string, ex
 		},
 		Expires: expires,
 		Profile: profile,
+		Region:  region,
 	}
 
 }
@@ -107,6 +110,7 @@ func (c *Credentials) Exec(app string, args []string) error {
 	env["AWS_ACCESS_KEY_ID"] = c.Value.AccessKeyID
 	env["AWS_SECRET_ACCESS_KEY"] = c.Value.SecretAccessKey
 	env["AWS_SESSION_TOKEN"] = c.Value.SessionToken
+	env["AWS_REGION"] = c.Region
 
 	cmd, err := exec.LookPath(app)
 
@@ -158,6 +162,7 @@ func (c *Credentials) String() string {
 		fmt.Sprintf("export AWSU_EXPIRES=%s", c.Expires.Format(time.RFC3339)),
 		fmt.Sprintf("export AWS_ACCESS_KEY_ID=%s", c.AccessKeyID),
 		fmt.Sprintf("export AWS_SECRET_ACCESS_KEY=%s", c.SecretAccessKey),
+		fmt.Sprintf("export AWS_REGION=%s", c.Region),
 	}
 
 	if c.SessionToken != "" {
