@@ -1,5 +1,6 @@
 .awsu*
 build/
+dist/
 exp/
 .token
 vendor/
