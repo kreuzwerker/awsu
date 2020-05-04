@@ -6,11 +6,12 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/defaults"
-	"github.com/kreuzwerker/awsu/config"
-	"github.com/kreuzwerker/awsu/strategy"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/yawn/doubledash"
+
+	"github.com/gesellix/awsu/config"
+	"github.com/gesellix/awsu/strategy"
 )
 
 var conf config.Config

@@ -5,9 +5,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	human "github.com/dustin/go-humanize"
-	"github.com/kreuzwerker/awsu/config"
-	"github.com/kreuzwerker/awsu/log"
-	"github.com/kreuzwerker/awsu/strategy/credentials"
+
+	"github.com/gesellix/awsu/config"
+	"github.com/gesellix/awsu/log"
+	"github.com/gesellix/awsu/strategy/credentials"
 )
 
 const (

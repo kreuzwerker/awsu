@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kreuzwerker/awsu/log"
+	"github.com/gesellix/awsu/log"
 )
 
 const (

@@ -2,8 +2,9 @@ package strategy
 
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/kreuzwerker/awsu/config"
-	"github.com/kreuzwerker/awsu/strategy/credentials"
+
+	"github.com/gesellix/awsu/config"
+	"github.com/gesellix/awsu/strategy/credentials"
 )
 
 // LongTerm is a strategy that uses long-term credentials (IAM user keypairs)

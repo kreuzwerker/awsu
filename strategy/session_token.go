@@ -7,13 +7,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/kreuzwerker/awsu/config"
-	"github.com/kreuzwerker/awsu/log"
-	"github.com/kreuzwerker/awsu/source"
-	"github.com/kreuzwerker/awsu/source/manual"
-	"github.com/kreuzwerker/awsu/source/yubikey"
-	"github.com/kreuzwerker/awsu/strategy/credentials"
-	"github.com/kreuzwerker/awsu/target/mfa"
+
+	"github.com/gesellix/awsu/config"
+	"github.com/gesellix/awsu/log"
+	"github.com/gesellix/awsu/source"
+	"github.com/gesellix/awsu/source/manual"
+	"github.com/gesellix/awsu/source/yubikey"
+	"github.com/gesellix/awsu/strategy/credentials"
+	"github.com/gesellix/awsu/target/mfa"
 )
 
 const (
