@@ -14,9 +14,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/kreuzwerker/awsu/log"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/yawn/envmap"
+
+	"github.com/gesellix/awsu/log"
 )
 
 const (

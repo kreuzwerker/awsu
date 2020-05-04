@@ -11,9 +11,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/arn"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/kreuzwerker/awsu/config"
-	"github.com/kreuzwerker/awsu/strategy"
 	"github.com/pkg/errors"
+
+	"github.com/gesellix/awsu/config"
+	"github.com/gesellix/awsu/strategy"
 )
 
 // Console is a helper for opening links to the AWS console

@@ -7,9 +7,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/kreuzwerker/awsu/log"
-	"github.com/kreuzwerker/awsu/source"
 	"github.com/pkg/errors"
+
+	"github.com/gesellix/awsu/log"
+	"github.com/gesellix/awsu/source"
 )
 
 const (

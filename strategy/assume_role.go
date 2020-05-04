@@ -9,10 +9,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/kreuzwerker/awsu/config"
-	"github.com/kreuzwerker/awsu/log"
-	"github.com/kreuzwerker/awsu/strategy/credentials"
 	"github.com/pkg/errors"
+
+	"github.com/gesellix/awsu/config"
+	"github.com/gesellix/awsu/log"
+	"github.com/gesellix/awsu/strategy/credentials"
 )
 
 const (

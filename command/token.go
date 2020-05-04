@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kreuzwerker/awsu/source/yubikey"
-	"github.com/kreuzwerker/awsu/target/mfa"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/gesellix/awsu/source/yubikey"
+	"github.com/gesellix/awsu/target/mfa"
 )
 
 const errTokenProfileNotFound = "no such profile or no direct MFA configured for profile %q"

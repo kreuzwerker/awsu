@@ -1,10 +1,11 @@
 package command
 
 import (
-	"github.com/kreuzwerker/awsu/source/yubikey"
-	"github.com/kreuzwerker/awsu/strategy"
-	"github.com/kreuzwerker/awsu/target/mfa"
 	"github.com/spf13/cobra"
+
+	"github.com/gesellix/awsu/source/yubikey"
+	"github.com/gesellix/awsu/strategy"
+	"github.com/gesellix/awsu/target/mfa"
 )
 
 var unregisterCmd = &cobra.Command{

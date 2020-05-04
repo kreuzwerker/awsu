@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/kreuzwerker/awsu/command"
+	"github.com/gesellix/awsu/command"
 )
 
 var (
