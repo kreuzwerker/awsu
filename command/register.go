@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	qr "github.com/mdp/qrterminal"
+	qr "github.com/mdp/qrterminal/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
