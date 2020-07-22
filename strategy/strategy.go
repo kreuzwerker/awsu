@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	errProfileAquisitionFailed = "failed to aquire credentials for profile %q: %s"
+	errProfileAquisitionFailed = "failed to acquire credentials for profile %q: %s"
 	errProfileCacheLoadExpired = "ignoring expired cached profile %q"
 	errProfileCacheLoadFailed  = "failed to load cached profile %q: %s"
 	errProfileCacheSaveFailed  = "failed to save cached profile %q: %s"
