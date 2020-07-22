@@ -23,7 +23,7 @@ const (
 // Strategy identifies a way of aquiring short-term, cacheable credentials
 type Strategy interface {
 
-	// Credentials aquires actual credentials
+	// Credentials acquires actual credentials
 	Credentials(*session.Session) (*credentials.Credentials, error)
 
 	// IsCacheable indicates the output of this strategy can be cached
@@ -85,7 +85,8 @@ func Apply(cfg *config.Config) (*credentials.Credentials, error) {
 
 		log.Debug(logStrategyWithProfile, a.Name(), cache, profile.Name)
 
-		// try to load
+		// try to 
+		load
 		if cache {
 
 			creds, err := credentials.Load(profile.Name)
@@ -100,7 +101,7 @@ func Apply(cfg *config.Config) (*credentials.Credentials, error) {
 
 		}
 
-		// try to aquire
+		// try to acquire
 		if current == nil {
 
 			creds, err := a.Credentials(sess)
