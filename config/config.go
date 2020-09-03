@@ -43,6 +43,12 @@ func (c *Config) Init() error {
 		return err
 	}
 
+	if c.Verbose {
+		log.Debug("Profiles found:\n")
+		for k := range profiles {
+			log.Debug("- %s\n", k)
+		}
+	}
 	c.Profiles = profiles
 
 	if c.Duration.Seconds() <= c.Grace.Seconds() {

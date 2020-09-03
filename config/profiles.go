@@ -56,7 +56,7 @@ func Load(files ...string) (Profiles, error) {
 				continue
 			}
 
-			if strings.HasPrefix(name, "profile") {
+			if strings.HasPrefix(name, "profile ") {
 				name = strings.TrimPrefix(name, "profile ")
 			}
 
