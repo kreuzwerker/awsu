@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -115,8 +114,7 @@ func (c *Credentials) Exec(app string, args []string) error {
 
 	log.Debug(logExec, cmd, args)
 
-	return syscall.Exec(cmd, args, env.ToEnv())
-
+	return exec_(cmd, args, env.ToEnv())
 }
 
 // IsValid indicates if a loaded credential is (still) valid
