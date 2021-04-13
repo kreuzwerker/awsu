@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"github.com/kreuzwerker/awsu/log"
 
 	"github.com/kreuzwerker/awsu/console"
 	"github.com/skratchdot/open-golang/open"
@@ -31,6 +32,7 @@ var consoleCmd = &cobra.Command{
 		}
 
 		if conf.Console.Open {
+			log.Info("Opening link %s", link)
 			return open.Run(link)
 		}
 
