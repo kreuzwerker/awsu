@@ -75,7 +75,7 @@ func (c *Console) external() (string, error) {
 
 	fep := map[string]string{
 		"sessionId":    creds.AccessKeyID,
-		"sessionKey":   creds.SessionToken,
+		"sessionKey":   creds.SecretAccessKey,
 		"sessionToken": creds.SessionToken,
 	}
 
