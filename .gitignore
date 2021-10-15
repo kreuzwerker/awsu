@@ -3,3 +3,6 @@ build/
 exp/
 .token
 vendor/
+
+dist/
+.vscode
