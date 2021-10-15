@@ -1,4 +1,4 @@
-name: goreleaser
+name: build
 
 on:
   push:
@@ -12,7 +12,7 @@ on:
       - '.github/workflows/**'
 
 jobs:
-  goreleaser:
+  binaries:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -25,8 +25,8 @@ jobs:
           go-version: 1.17
       - name: Setup Dependencies
         run: |
-          apt-get update -q
-          apt-get install -qqy libpcsclite-dev
+          sudo apt-get update -q
+          sudo apt-get install -qqy libpcsclite-dev
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
