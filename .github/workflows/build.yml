@@ -11,6 +11,9 @@ on:
       - go.mod
       - '.github/workflows/**'
 
+env:
+  DEBIAN_FRONTEND: noninteractive
+
 jobs:
   binaries:
     runs-on: ubuntu-20.04
@@ -26,7 +29,7 @@ jobs:
       - name: Setup Dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -qqy libpcsclite-dev
+          sudo apt-get install -qqy build-essential software-properties-common pkg-config wget libpcsclite-dev
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
