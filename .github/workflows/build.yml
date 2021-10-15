@@ -11,9 +11,6 @@ on:
       - go.mod
       - '.github/workflows/**'
 
-env:
-  DEBIAN_FRONTEND: noninteractive
-
 jobs:
   binaries:
     runs-on: macos-11
@@ -26,11 +23,6 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.17
-      # - name: Setup Dependencies
-      #   run: |
-      #     sudo apt-get update -q
-      #     sudo apt-get install -qqy build-essential software-properties-common pkg-config wget libpcsclite-dev
-      #     mkdir -p build && go build -o build/awsu awsu.go
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
