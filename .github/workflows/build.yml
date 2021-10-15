@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.17
-      - name: Setup cookies
+      - name: Setup Dependencies
         run: |
           apt-get update -q
           apt-get install -qqy libpcsclite-dev
