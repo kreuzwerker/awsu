@@ -9,13 +9,14 @@ USER := kreuzwerker
 build/awsu-linux-amd64:
 	@mkdir -p build
 	nice docker container run -it --rm -e "GO111MODULE=on" \
-		-v $(PWD):/go/src/github.com/kreuzwerker/awsu \
-		golang:1.11-stretch bash -c \
-		"apt-get update -q && apt-get install -qqy libpcsclite-dev && cd /go/src/github.com/kreuzwerker/awsu && go mod download && go build -o $@ -ldflags $(FLAGS) awsu.go"
+		-v $(PWD):/build/awsu \
+		-w /build/awsu \
+		golang:1.17-stretch bash -c \
+		"apt-get update -q && apt-get install -qqy libpcsclite-dev && go mod download && go build -o $@ -ldflags $(FLAGS) awsu.go"
 
 build/awsu-darwin-amd64:
 	@mkdir -p build
-	GO111MODULES=on nice go build -o $@ -ldflags $(FLAGS) awsu.go
+	nice go build -o $@ -ldflags $(FLAGS) awsu.go
 
 build: build/awsu-darwin-amd64 build/awsu-linux-amd64;
 
