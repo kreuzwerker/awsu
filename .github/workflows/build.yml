@@ -30,8 +30,9 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -qqy build-essential software-properties-common pkg-config wget libpcsclite-dev
+          mkdir -p build && go build -o build/awsu awsu.go
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: release --rm-dist --skip-publish --snapshot --skip-sign
+          args: release --rm-dist --skip-publish --snapshot --skip-sign --debug
