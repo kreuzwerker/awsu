@@ -1,6 +1,9 @@
 # Amazon Web Services Switch User (`awsu`)
 
-[![Documentation](https://godoc.org/github.com/kreuzwerker/awsu?status.svg)](http://godoc.org/github.com/kreuzwerker/awsu) [![Go Report Card](https://goreportcard.com/badge/github.com/kreuzwerker/awsu)](https://goreportcard.com/report/github.com/kreuzwerker/awsu) [![Build Status](https://travis-ci.org/kreuzwerker/awsu.svg?branch=master)](https://travis-ci.org/kreuzwerker/awsu)
+[![Release](https://img.shields.io/github/v/release/kreuzwerker/awsu)](https://github.com/kreuzwerker/awsu/releases)
+[![Build Status](https://github.com/kreuzwerker/awsu/workflows/build/badge.svg)](https://github.com/kreuzwerker/awsu/actions)
+[![Documentation](https://godoc.org/github.com/kreuzwerker/awsu?status.svg)](http://godoc.org/github.com/kreuzwerker/awsu) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/kreuzwerker/awsu)](https://goreportcard.com/report/github.com/kreuzwerker/awsu) 
 
 `awsu` provides a convenient integration of [AWS](https://aws.amazon.com/) virtual [MFA devices](https://aws.amazon.com/iam/details/mfa/) into commandline based workflows. It does use [Yubikeys](https://www.yubico.com/) to provide the underlying [TOTP](https://tools.ietf.org/html/rfc6238) one-time passwords but does not rely on additional external infrastructure such as e.g. federation.
 
