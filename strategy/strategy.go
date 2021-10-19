@@ -85,8 +85,7 @@ func Apply(cfg *config.Config) (*credentials.Credentials, error) {
 
 		log.Debug(logStrategyWithProfile, a.Name(), cache, profile.Name)
 
-		// try to 
-		load
+		// try to load
 		if cache {
 
 			creds, err := credentials.Load(profile.Name)
