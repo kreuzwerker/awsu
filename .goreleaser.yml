@@ -8,8 +8,16 @@ builds:
       - darwin
     goarch:
       - amd64
+  - builder: prebuilt
+  goos:
+  - linux
+  goarch:
+  - amd64
+  prebuilt:
+    path: build/awsu_{{ .Os }}_{{ .Arch }}
 archives:
   - replacements:
+      linux: Linux
       darwin: Darwin
       amd64: x86_64
 checksum:

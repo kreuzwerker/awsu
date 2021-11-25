@@ -38,8 +38,13 @@ jobs:
       - name: Build linux binary
         run: |
           make build/awsu-linux-amd64
+          ls -lash build
+          cp build/awsu-linux-amd64 build/awsu-linux-amd64_linux_amd64
+          ls -lash build
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
           args: release --rm-dist --skip-publish --snapshot --skip-sign --debug
+      - name: List dist directory
+        run: ls -lash dist
