@@ -6,3 +6,5 @@ vendor/
 
 dist/
 .vscode
+# during GH action release
+default.profraw
