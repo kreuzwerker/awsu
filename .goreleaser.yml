@@ -2,19 +2,21 @@ before:
   hooks:
     - go mod tidy
 builds:
-  - env:
+  - id: "awsu-darwin"
+    env:
       - CGO_ENABLED=1
     goos:
       - darwin
     goarch:
       - amd64
-  - builder: prebuilt
-  goos:
-  - linux
-  goarch:
-  - amd64
-  prebuilt:
-    path: build/awsu_{{ .Os }}_{{ .Arch }}
+  - id: "awsu-linux"
+    builder: prebuilt
+    goos:
+    - linux
+    goarch:
+    - amd64
+    prebuilt:
+      path: build/awsu_{{ .Os }}_{{ .Arch }}
 archives:
   - replacements:
       linux: Linux
