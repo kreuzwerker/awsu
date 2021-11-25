@@ -23,8 +23,28 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.17
+      - name: Updating and upgrading brew
+        run: |
+          ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+          brew --version
+      - name: Install and start docker
+        # https://github.com/docker/for-mac/issues/2359#issuecomment-943131345
+        run: |
+          brew install --cask docker
+          sudo /Applications/Docker.app/Contents/MacOS/Docker --unattended --install-privileged-components
+          open -a /Applications/Docker.app --args --unattended --accept-license
+          echo "Waiting for docker to be up"
+          while ! /Applications/Docker.app/Contents/Resources/bin/docker info &>/dev/null; do echo -n "."; sleep 1; done
+      - name: Build linux binary
+        run: |
+          make build/awsu-linux-amd64
+          # as it is the format goreleaser expects
+          cp build/awsu-linux-amd64 build/awsu_linux_amd64
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
+          distribution: goreleaser-pro
           version: latest
           args: release --rm-dist --skip-publish --snapshot --skip-sign --debug
+        env:
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}

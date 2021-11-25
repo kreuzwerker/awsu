@@ -7,7 +7,7 @@ USER := kreuzwerker
 
 build/awsu-linux-amd64:
 	@mkdir -p build
-	nice docker container run -it --rm \
+	nice docker container run --rm \
 		-v $(PWD):/build/awsu \
 		-w /build/awsu \
 		golang:1.17-stretch bash -c \
@@ -15,7 +15,7 @@ build/awsu-linux-amd64:
 		
 build/awsu-linux-amd64-ubuntu:
 	@mkdir -p build
-	nice docker container run -it --rm -e DEBIAN_FRONTEND=noninteractive \
+	nice docker container run --rm -e DEBIAN_FRONTEND=noninteractive \
 		-v $(PWD):/build/awsu \
 		-w /build/awsu \
 		ubuntu:20.04 bash -c \
