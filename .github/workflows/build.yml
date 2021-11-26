@@ -30,8 +30,8 @@ jobs:
       - name: Setup dependencies
         if: matrix.os == 'ubuntu-latest'
         run: |
-          apt-get update -q
-          apt-get install -qqy build-essential software-properties-common pkg-config wget libpcsclite-dev
+          sudo apt-get update -q
+          sudo apt-get install -qqy build-essential software-properties-common pkg-config wget libpcsclite-dev
       - name: Build darwin
         if: matrix.os == 'macos-latest'
         run: |
