@@ -36,12 +36,12 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           make build/awsu-darwin-amd64
-          mv build/awsu-darwin-amd64 build/awsu-macos-amd64
+          mv build/awsu-darwin-amd64 build/awsu-macos-latest-amd64
       - name: Build linux
         if: matrix.os == 'ubuntu-latest'
         run: |
           make build/awsu-linux-amd64
-          mv build/awsu-linux-amd64 build/awsu-ubuntu-amd64
+          mv build/awsu-linux-amd64 build/awsu-ubuntu-latest-amd64
       - uses: actions/upload-artifact@v2
         with:
           name: awsu-${{ matrix.os }}
@@ -63,8 +63,8 @@ jobs:
       - name: Build linux binary
         run: |
           # as it is the format goreleaser expects
-          mv build/awsu-ubuntu-amd64 build/awsu_linux_amd64
-          mv build/awsu-macos-amd64 build/awsu_linux_amd64
+          mv build/awsu-ubuntu-latest-amd64 build/awsu_linux_amd64
+          mv build/awsu-macos-latest-amd64 build/awsu_linux_amd64
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
