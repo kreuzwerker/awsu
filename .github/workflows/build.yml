@@ -13,7 +13,11 @@ on:
 
 jobs:
   binaries:
-    runs-on: macos-11
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -23,23 +27,44 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.17
-      - name: Updating and upgrading brew
+      - name: Setup dependencies
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-          brew --version
-      - name: Install and start docker
-        # https://github.com/docker/for-mac/issues/2359#issuecomment-943131345
+          apt-get update -q
+          apt-get install -qqy build-essential software-properties-common pkg-config wget libpcsclite-dev
+      - name: Build darwin
+        if: matrix.os == 'macos-latest'
         run: |
-          brew install --cask docker
-          sudo /Applications/Docker.app/Contents/MacOS/Docker --unattended --install-privileged-components
-          open -a /Applications/Docker.app --args --unattended --accept-license
-          echo "Waiting for docker to be up"
-          while ! /Applications/Docker.app/Contents/Resources/bin/docker info &>/dev/null; do echo -n "."; sleep 1; done
-      - name: Build linux binary
+          make build/awsu-darwin-amd64
+          mv build/awsu-darwin-amd64 build/awsu-macos-amd64
+      - name: Build linux
+        if: matrix.os == 'ubuntu-latest'
         run: |
           make build/awsu-linux-amd64
+          mv build/awsu-linux-amd64 build/awsu-ubuntu-amd64
+      - uses: actions/upload-artifact@v2
+        with:
+          name: awsu-${{ matrix.os }}
+          path: build/awsu-${{ matrix.os }}-amd64
+      
+  binaries1:
+    runs-on: macos-11
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v2
+        with:
+          name: awsu-macos
+      - uses: actions/download-artifact@v2
+        with:
+          name: awsu-ubuntu
+      - name: Build linux binary
+        run: |
           # as it is the format goreleaser expects
-          cp build/awsu-linux-amd64 build/awsu_linux_amd64
+          mv build/awsu-ubuntu-amd64 build/awsu_linux_amd64
+          mv build/awsu-macos-amd64 build/awsu_linux_amd64
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:

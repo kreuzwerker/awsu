@@ -2,17 +2,11 @@ before:
   hooks:
     - go mod tidy
 builds:
-  - id: "awsu-darwin"
-    env:
-      - CGO_ENABLED=1
-    goos:
-      - darwin
-    goarch:
-      - amd64
-  - id: "awsu-linux"
+  - id: "awsu-linux-darwin"
     builder: prebuilt
     goos:
     - linux
+    - darwin
     goarch:
     - amd64
     prebuilt:
