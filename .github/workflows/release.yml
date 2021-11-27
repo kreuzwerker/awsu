@@ -6,8 +6,12 @@ on:
       - '*'
 
 jobs:
-  binaries:
-    runs-on: macos-11
+  artifact-build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -17,23 +21,50 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.17
-      - name: Updating and upgrading brew
+      - name: Setup dependencies
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-          brew --version
-      - name: Install and start docker
-        # https://github.com/docker/for-mac/issues/2359#issuecomment-943131345
+          sudo apt-get update -q
+          sudo apt-get install -qqy build-essential software-properties-common pkg-config wget libpcsclite-dev
+      - name: Build darwin
+        if: matrix.os == 'macos-latest'
         run: |
-          brew install --cask docker
-          sudo /Applications/Docker.app/Contents/MacOS/Docker --unattended --install-privileged-components
-          open -a /Applications/Docker.app --args --unattended --accept-license
-          echo "Waiting for docker to be up"
-          while ! /Applications/Docker.app/Contents/Resources/bin/docker info &>/dev/null; do echo -n "."; sleep 1; done
-      - name: Build linux binary
+          make build/awsu-darwin-amd64
+          mv build/awsu-darwin-amd64 build/awsu-macos-latest-amd64
+      - name: Build linux
+        if: matrix.os == 'ubuntu-latest'
         run: |
           make build/awsu-linux-amd64
-          # as it is the format goreleaser expects
-          cp build/awsu-linux-amd64 build/awsu_linux_amd64
+          mv build/awsu-linux-amd64 build/awsu-ubuntu-latest-amd64
+      - uses: actions/upload-artifact@v2
+        with:
+          name: awsu-${{ matrix.os }}-amd64
+          path: build/awsu-${{ matrix.os }}-amd64
+      
+  release-test:
+    runs-on: ubuntu-latest
+    needs: [artifact-build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Download macos
+        uses: actions/download-artifact@v2
+        with:
+          name: awsu-macos-latest-amd64
+          path: build/awsu-macos-latest-amd64
+      - name: Download linux
+        uses: actions/download-artifact@v2
+        with:
+          name: awsu-ubuntu-latest-amd64
+          path: build/awsu-ubuntu-latest-amd64
+      - name: Correct goreleaser prebuilt path
+        run: |
+          # as it is the format goreleaser expects. See .goreleaser.yml -> prebuilt -> path
+          mv build/awsu-ubuntu-latest-amd64 build/awsu_linux_amd64
+          mv build/awsu-macos-latest-amd64 build/awsu_darwin_amd64
+          ls -lash build
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
