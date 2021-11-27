@@ -12,7 +12,7 @@ on:
       - '.github/workflows/**'
 
 jobs:
-  binaries:
+  artifact-build:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -49,6 +49,7 @@ jobs:
       
   release-test:
     runs-on: macos-11
+    needs: [artifact-build]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
