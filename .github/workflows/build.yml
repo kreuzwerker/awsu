@@ -69,7 +69,8 @@ jobs:
         run: |
           # as it is the format goreleaser expects. See .goreleaser.yml -> prebuilt -> path
           mv build/awsu-ubuntu-latest-amd64 build/awsu_linux_amd64
-          mv build/awsu-macos-latest-amd64 build/awsu_linux_amd64
+          mv build/awsu-macos-latest-amd64 build/awsu_darwin_amd64
+          ls -lash build
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
