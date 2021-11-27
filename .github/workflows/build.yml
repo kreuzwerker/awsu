@@ -59,10 +59,12 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: awsu-macos-latest-amd64
+          path: build/awsu-macos-latest-amd64
       - name: Download linux
         uses: actions/download-artifact@v2
         with:
           name: awsu-ubuntu-latest-amd64
+          path: build/awsu-ubuntu-latest-amd64
       - name: Correct goreleaser prebuilt path
         run: |
           # as it is the format goreleaser expects. See .goreleaser.yml -> prebuilt -> path
