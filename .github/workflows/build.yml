@@ -44,25 +44,27 @@ jobs:
           mv build/awsu-linux-amd64 build/awsu-ubuntu-latest-amd64
       - uses: actions/upload-artifact@v2
         with:
-          name: awsu-${{ matrix.os }}
+          name: awsu-${{ matrix.os }}-amd64
           path: build/awsu-${{ matrix.os }}-amd64
       
-  binaries1:
+  release-test:
     runs-on: macos-11
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: actions/download-artifact@v2
+      - name: Download macos
+        uses: actions/download-artifact@v2
         with:
-          name: awsu-macos
-      - uses: actions/download-artifact@v2
+          name: awsu-macos-latest
+      - name: Download linux
+        uses: actions/download-artifact@v2
         with:
-          name: awsu-ubuntu
-      - name: Build linux binary
+          name: awsu-ubuntu-latest
+      - name: Correct goreleaser prebuilt path
         run: |
-          # as it is the format goreleaser expects
+          # as it is the format goreleaser expects. See .goreleaser.yml -> prebuilt -> path
           mv build/awsu-ubuntu-latest-amd64 build/awsu_linux_amd64
           mv build/awsu-macos-latest-amd64 build/awsu_linux_amd64
       - name: Run GoReleaser
