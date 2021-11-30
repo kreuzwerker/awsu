@@ -53,12 +53,12 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: awsu-macos-latest-amd64
-          path: build/awsu-macos-latest-amd64
+          path: build
       - name: Download linux
         uses: actions/download-artifact@v2
         with:
           name: awsu-ubuntu-latest-amd64
-          path: build/awsu-ubuntu-latest-amd64
+          path: build
       - name: Correct goreleaser prebuilt path
         run: |
           # as it is the format goreleaser expects. See .goreleaser.yml -> prebuilt -> path
@@ -70,7 +70,7 @@ jobs:
         with:
           distribution: goreleaser-pro
           version: latest
-          args: release --rm-dist
+          args: release --rm-dist --skip-publish --snapshot --skip-sign --debug
         env:
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
