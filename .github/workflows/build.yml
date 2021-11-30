@@ -37,11 +37,13 @@ jobs:
         run: |
           make build/awsu-darwin-amd64
           mv build/awsu-darwin-amd64 build/awsu-macos-latest-amd64
+          ls -lash build
       - name: Build linux
         if: matrix.os == 'ubuntu-latest'
         run: |
           make build/awsu-linux-amd64
           mv build/awsu-linux-amd64 build/awsu-ubuntu-latest-amd64
+          ls -lash build
       - uses: actions/upload-artifact@v2
         with:
           name: awsu-${{ matrix.os }}-amd64
@@ -59,15 +61,17 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: awsu-macos-latest-amd64
-          path: build/awsu-macos-latest-amd64
+          path: build
       - name: Download linux
         uses: actions/download-artifact@v2
         with:
           name: awsu-ubuntu-latest-amd64
-          path: build/awsu-ubuntu-latest-amd64
+          path: build
       - name: Correct goreleaser prebuilt path
         run: |
           # as it is the format goreleaser expects. See .goreleaser.yml -> prebuilt -> path
+          pwd
+          ls -lash build
           mv build/awsu-ubuntu-latest-amd64 build/awsu_linux_amd64
           mv build/awsu-macos-latest-amd64 build/awsu_darwin_amd64
           ls -lash build
