@@ -85,4 +85,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GORELEASER_TOKEN: ${{ secrets.GORELEASER_TOKEN }}
       - name: Debug print formula
-        run: cat build/awsu.rb
+        run: cat dist/awsu.rb
