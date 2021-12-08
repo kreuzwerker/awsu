@@ -68,8 +68,11 @@ jobs:
       - name: Correct goreleaser prebuilt path
         run: |
           # as it is the format goreleaser expects. See .goreleaser.yml -> prebuilt -> path
-          mv build/awsu-ubuntu-latest-amd64 build/awsu_linux_amd64
-          mv build/awsu-macos-latest-amd64 build/awsu_darwin_amd64
+          # we need at least an arm url for brew: https://github.com/kreuzwerker/homebrew-taps/issues/11
+          cp build/awsu-ubuntu-latest-amd64 build/awsu_linux_amd64
+          cp build/awsu-ubuntu-latest-amd64 build/awsu_linux_arm64
+          cp build/awsu-macos-latest-amd64 build/awsu_darwin_amd64
+          cp build/awsu-macos-latest-amd64 build/awsu_darwin_arm64
           ls -lash build
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
