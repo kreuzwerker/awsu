@@ -74,7 +74,6 @@ jobs:
           cp build/awsu-macos-latest-amd64 build/awsu_darwin_amd64
           cp build/awsu-macos-latest-amd64 build/awsu_darwin_arm64
           ls -lash build
-          cat build/awsu.rb
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
@@ -85,3 +84,5 @@ jobs:
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GORELEASER_TOKEN: ${{ secrets.GORELEASER_TOKEN }}
+      - name: Debug print formula
+        run: cat build/awsu.rb
