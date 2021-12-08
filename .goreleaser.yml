@@ -6,6 +6,7 @@ builds:
     - darwin
     goarch:
     - amd64
+    - arm64
     prebuilt:
       path: build/awsu_{{ .Os }}_{{ .Arch }}
 archives:
@@ -13,6 +14,7 @@ archives:
       linux: Linux
       darwin: Darwin
       amd64: x86_64
+      arm64: arm
 checksum:
   name_template: 'checksums.txt'
 snapshot:
