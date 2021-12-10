@@ -75,7 +75,7 @@ func (c *Console) external() (string, error) {
 
 	fep := map[string]string{
 		"sessionId":    creds.AccessKeyID,
-		"sessionKey":   creds.SessionToken,
+		"sessionKey":   creds.SecretAccessKey,
 		"sessionToken": creds.SessionToken,
 	}
 
@@ -85,11 +85,11 @@ func (c *Console) external() (string, error) {
 		return "", errors.Wrapf(err, errFederationMarshal)
 	}
 
-	url := fmt.Sprintf("https://signin.aws.amazon.com/federation?Action=getSigninToken&Session=%s", string(url.QueryEscape(string(enc))))
+	federationUrl := fmt.Sprintf("https://signin.aws.amazon.com/federation?Action=getSigninToken&Session=%s", string(url.QueryEscape(string(enc))))
 
 	var buf = bytes.NewBuffer(nil)
 
-	res, err := http.Get(url)
+	res, err := http.Get(federationUrl)
 
 	if err != nil {
 		return "", errors.Wrapf(err, errFederationRequest)
@@ -113,12 +113,12 @@ func (c *Console) external() (string, error) {
 		token       = body["SigninToken"]
 	)
 
-	url = fmt.Sprintf("https://signin.aws.amazon.com/federation?Action=login&Issuer=%s&Destination=%s&SigninToken=%s\n",
+	federationUrl = fmt.Sprintf("https://signin.aws.amazon.com/federation?Action=login&Issuer=%s&Destination=%s&SigninToken=%s",
 		issuer,
-		destination,
-		token)
+		url.QueryEscape(destination),
+		url.QueryEscape(token))
 
-	return url, nil
+	return federationUrl, nil
 
 }
 
