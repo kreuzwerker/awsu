@@ -1,7 +1,7 @@
 module github.com/kreuzwerker/awsu
 
 require (
-	github.com/aws/aws-sdk-go v1.33.0
+	github.com/aws/aws-sdk-go v1.34.0
 	github.com/dustin/go-humanize v0.0.0-20180713052910-9f541cc9db5d
 	github.com/mdp/qrterminal v1.0.0
 	github.com/mitchellh/go-homedir v1.0.0
