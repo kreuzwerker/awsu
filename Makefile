@@ -22,7 +22,7 @@ build/awsu-linux-amd64-ubuntu:
 		"apt-get update -q && apt-get install -qqy build-essential software-properties-common pkg-config wget libpcsclite-dev && wget -c https://dl.google.com/go/go1.19.5.linux-amd64.tar.gz -O - | tar -xz -C /usr/local && export PATH=$$PATH:/usr/local/go/bin && go mod download && go build -o $@ -ldflags $(FLAGS) awsu.go"
 
 # Test within the container
-# curl -sL https://git.io/goreleaser | bash -s -- --rm-dist --skip-publish --snapshot --skip-sign --debug
+# curl -sL https://git.io/goreleaser | bash -s -- --clean --skip-publish --snapshot --skip-sign --debug
 
 build/awsu-darwin-amd64:
 	@mkdir -p build
