@@ -7,6 +7,8 @@ builds:
     goarch:
     - amd64
     - arm64
+    goamd64:
+    - v1
     prebuilt:
       path: build/awsu_{{ .Os }}_{{ .Arch }}
 archives:
