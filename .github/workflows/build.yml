@@ -20,11 +20,11 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: 1.19
       - name: Setup dependencies
@@ -42,7 +42,7 @@ jobs:
         run: |
           make build/awsu-linux-amd64
           mv build/awsu-linux-amd64 build/awsu-ubuntu-latest-amd64
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: awsu-${{ matrix.os }}-amd64
           path: build/awsu-${{ matrix.os }}-amd64
@@ -52,21 +52,21 @@ jobs:
     needs: [artifact-build]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       # need to setup to avoid https://goreleaser.com/deprecations/#builds-for-darwinarm64
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: 1.19
       - name: Download macos
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: awsu-macos-latest-amd64
           path: build
       - name: Download linux
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: awsu-ubuntu-latest-amd64
           path: build
@@ -80,7 +80,7 @@ jobs:
           cp build/awsu-macos-latest-amd64 build/awsu_darwin_arm64
           ls -lash build
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser-pro
           version: latest
@@ -89,3 +89,6 @@ jobs:
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GORELEASER_TOKEN: ${{ secrets.GORELEASER_TOKEN }}
+      - name: List goreleaser dist folder contents
+        run: |
+          ls -lash dist

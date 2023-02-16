@@ -7,14 +7,17 @@ builds:
     goarch:
     - amd64
     - arm64
+    goamd64:
+    - v1
     prebuilt:
       path: build/awsu_{{ .Os }}_{{ .Arch }}
 archives:
-  - replacements:
-      linux: Linux
-      darwin: Darwin
-      amd64: x86_64
-      arm64: arm
+  - name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "arm64" }}arm
+      {{- else }}{{ .Arch }}{{ end }}
 checksum:
   name_template: 'checksums.txt'
 snapshot:
