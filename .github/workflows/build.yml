@@ -42,7 +42,7 @@ jobs:
         run: |
           make build/awsu-linux-amd64
           mv build/awsu-linux-amd64 build/awsu-ubuntu-latest-amd64
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: awsu-${{ matrix.os }}-amd64
           path: build/awsu-${{ matrix.os }}-amd64
@@ -61,12 +61,12 @@ jobs:
         with:
           go-version: 1.19
       - name: Download macos
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: awsu-macos-latest-amd64
           path: build
       - name: Download linux
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: awsu-ubuntu-latest-amd64
           path: build
