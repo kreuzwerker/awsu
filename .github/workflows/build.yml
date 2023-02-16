@@ -20,7 +20,7 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Set up Go
@@ -52,7 +52,7 @@ jobs:
     needs: [artifact-build]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       # need to setup to avoid https://goreleaser.com/deprecations/#builds-for-darwinarm64
